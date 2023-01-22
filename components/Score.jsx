@@ -2,7 +2,7 @@ import React, { useRef, useLayoutEffect, useState, useEffect } from 'react'
 import VexFlow from 'vexflow'
 
 const VF = VexFlow.Flow
-const { Formatter, Renderer, Stave, StaveNote } = VF
+const { Formatter, Renderer, Stave, StaveNote, Accidental } = VF
 
 const clefWidth = 30;
 const timeWidth = 30;
@@ -56,19 +56,25 @@ export default function Score({
             stave.setContext(context).draw()
 
             const processedNotes = notes
-                .map(note => (typeof note === 'string' ? { key: note } : note))
-                .map(note =>
-                    Array.isArray(note) ? { key: note[0], duration: note[1] } : note
-                ).map(({ key, ...rest }) =>
+                .map(({ key, ...rest }) =>
                     typeof key === 'string' ? {
                         key: key.includes('/') ? key : `${key[0]}/${key.slice(1)}`,
                         ...rest,
                     } : rest
-                ).map(({ key, keys, duration = 'q' }) =>
-                    new StaveNote({
-                    keys: key ? [key] : keys,
-                    duration: String(duration),
-                }))
+                ).map(({ key, keys, duration = 'q' }) => {
+                    let note = new StaveNote({
+                        keys: key ? [key] : keys,
+                        duration: String(duration),
+                    });
+                    keys.forEach((k, i) => {
+                        if (k[1] === 'b') {
+                            note.addModifier(new Accidental('b'), i)
+                        } else if (k[1] === '#') {
+                            note.addModifier(new Accidental('#'), i)
+                        }
+                    });
+                    return note;
+                })
             Formatter.FormatAndDraw(context, stave, processedNotes, {
                 auto_beam: true,
             })
