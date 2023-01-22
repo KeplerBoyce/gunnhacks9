@@ -50,45 +50,45 @@ export default function OptionsModal(props: {
         }
     }
 
-    const setAllKeys = () => {
-        if (Object.values(keys).every(v => v)) {
-            setKeys({
-                C: false,
-                G: false,
-                D: false,
-                A: false,
-                E: false,
-                B: false,
-                Fs: false,
-                Cs: false,
-                F: false,
-                Bb: false,
-                Eb: false,
-                Ab: false,
-                Db: false,
-                Gb: false,
-                Cb: false,
-            });
-        } else {
-            setKeys({
-                C: true,
-                G: true,
-                D: true,
-                A: true,
-                E: true,
-                B: true,
-                Fs: true,
-                Cs: true,
-                F: true,
-                Bb: true,
-                Eb: true,
-                Ab: true,
-                Db: true,
-                Gb: true,
-                Cb: true,
-            });
-        }
-    }
+    // const setAllKeys = () => {
+    //     if (Object.values(keys).every(v => v)) {
+    //         setKeys({
+    //             C: false,
+    //             G: false,
+    //             D: false,
+    //             A: false,
+    //             E: false,
+    //             B: false,
+    //             Fs: false,
+    //             Cs: false,
+    //             F: false,
+    //             Bb: false,
+    //             Eb: false,
+    //             Ab: false,
+    //             Db: false,
+    //             Gb: false,
+    //             Cb: false,
+    //         });
+    //     } else {
+    //         setKeys({
+    //             C: true,
+    //             G: true,
+    //             D: true,
+    //             A: true,
+    //             E: true,
+    //             B: true,
+    //             Fs: true,
+    //             Cs: true,
+    //             F: true,
+    //             Bb: true,
+    //             Eb: true,
+    //             Ab: true,
+    //             Db: true,
+    //             Gb: true,
+    //             Cb: true,
+    //         });
+    //     }
+    // }
 
     const setAllNoteTypes = () => {
         if (Object.values(noteTypes).every(v => v)) {
@@ -159,7 +159,7 @@ export default function OptionsModal(props: {
                         text="Bass"
                     />
                 </ToggleButtonGroup>
-                <ToggleButtonGroup
+                {/* <ToggleButtonGroup
                     title="All keys"
                     isOn={Object.values(keys).every(v => v)}
                     callback={setAllKeys}
@@ -239,7 +239,7 @@ export default function OptionsModal(props: {
                         callback={() => setKeys({...keys, Cb: !keys.Cb})}
                         text="Cb"
                     />
-                </ToggleButtonGroup>
+                </ToggleButtonGroup> */}
                 <ToggleButtonGroup
                     title="All note types"
                     isOn={Object.values(noteTypes).every(v => v)}
