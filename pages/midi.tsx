@@ -31,13 +31,14 @@ function MidiContent() {
         const midi = WebMidi.getInputById(deviceId)
         const callback = (e: NoteMessageEvent) => {
             setNotes((prevState) => [
-                ...prevState, e.note.identifier + Math.floor(e.note.number / 12 - 1)
+                ...prevState, e.note.identifier
             ]);
         }
-
-        midi.channels[1].addListener("noteon", callback);
-        return () => midi.channels[1].removeListener("noteon", callback)
-    }, [])
+        midi.channels.forEach(channel => channel.addListener("noteon", callback));
+        return () => {
+            midi.channels.forEach(channel => channel.removeListener("noteon", callback));
+        }
+    }, [deviceId, setNotes])
     
     return <div>
         <h2 className="text-center text-3xl font-bold">Devices</h2>
@@ -46,7 +47,7 @@ function MidiContent() {
         </ol>
 
         <h2 className="text-center text-3xl font-bold">Notes</h2>
-        <ul>{notes}</ul>
+        <ul>{notes.map((note, idx) => <li key={idx}>{note}</li>)}</ul>
     </div>
 }
 
