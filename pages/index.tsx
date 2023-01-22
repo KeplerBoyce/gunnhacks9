@@ -6,6 +6,7 @@ import Button from "../components/Button";
 import Score from "../components/Score";
 import OptionsModal from "../components/OptionsModal";
 import {defaultClefs, defaultKeys, defaultNoteTypes} from "../util/types";
+import Soundfont from "soundfont-player"
 
 type Chord = string[];
 
@@ -205,6 +206,13 @@ export default function Home() {
             .then(() => checkForInputs(setLoadState, setDevices))
             .catch(err => alert(err));
         newRandomChord();
+        Soundfont.instrument(new AudioContext(), 'acoustic_grand_piano').then(function (piano) {
+            window.navigator.requestMIDIAccess().then(function (midiAccess) {
+                midiAccess.inputs.forEach(function (midiInput) {
+                  piano.listenToMidi(midiInput)
+                })
+              })
+        })
     }, [])
 
     // generate new chord after connecting MIDI device
