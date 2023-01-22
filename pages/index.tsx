@@ -1,15 +1,15 @@
 import Head from "next/head";
 import {Input, NoteMessageEvent, WebMidi} from "webmidi";
-import {createContext, MouseEventHandler, startTransition, useContext, useEffect, useState} from "react";
+import {createContext, useContext, useEffect, useState} from "react";
 import CenteredModal from "../components/CenteredModal";
 import Button from "../components/Button";
 import Score from "../components/Score";
 import OptionsModal from "../components/OptionsModal";
-import { defaultClefs, defaultKeys, defaultNoteTypes } from "../util/types";
+import {defaultClefs, defaultKeys, defaultNoteTypes} from "../util/types";
 
 type Chord = string[];
 
-const CHORDS: {[name: string]: Chord} = {
+const CHORDS: { [name: string]: Chord } = {
     A: ["a/4", "c/5", "e/5"],
     B: ["b/4", "d#/5", "f#/5"],
     C: ["c/4", "e/4", "g/4"],
@@ -71,7 +71,7 @@ const MidiContextProvider = MidiContext.Provider;
 
 function MidiContent() {
     const {deviceId, notes, setNotes} = useContext(MidiContext);
-    
+
     useEffect(() => {
         const midi = WebMidi.getInputById(deviceId)
         const callback = (e: NoteMessageEvent) => {
@@ -85,8 +85,8 @@ function MidiContent() {
         return () => {
             midi.channels.forEach(channel => channel.removeListener("noteon", callback));
         }
-    }, [deviceId, notes])
-    
+    }, [deviceId, notes, setNotes])
+
     return <div>
         {/* <h2 className="text-center text-3xl font-bold">Notes</h2>
         <ul>{notes.map((note, idx) => <li key={idx}>{note}</li>)}</ul> */}
@@ -98,7 +98,8 @@ function DeviceSelectForm() {
     // console.log("Devices:")
     // console.log(devices)
 
-    const handleSubmit = () => {
+    const handleSubmit = (submittedDeviceId: string) => {
+        setDeviceId(submittedDeviceId);
         setLoadState(LoadingState.DEVICE_SELECTED);
         setModalOpen(false);
     }
@@ -110,9 +111,9 @@ function DeviceSelectForm() {
                     Select a MIDI device
                 </h1>
                 <div className="flex flex-col">
-                    {devices.map(device => (
+                    {devices.length > 0 && devices.map(device => (
                         <button
-                            onClick={() => setDeviceId(device.id)}
+                            onClick={() => handleSubmit(device.id)}
                             key={device.id}
                             className={"duration-200 px-2 py-1 rounded-lg cursor-pointer "
                                 + (deviceId === device.id ? "bg-blue-300 hover:bg-blue-400" : "hover:bg-gray-200")}
@@ -120,12 +121,8 @@ function DeviceSelectForm() {
                             {device.name}
                         </button>
                     ))}
+                    {devices.length == 0 && <p className="text-center">No devices found</p>}
                 </div>
-                <Button
-                    onClick={() => handleSubmit()}
-                    text="Select"
-                    canSubmit={!!deviceId}
-                />
                 <Button
                     onClick={() => checkForInputs(setLoadState, setDevices)}
                     text="Rescan"
@@ -142,16 +139,9 @@ function PageContent() {
         case LoadingState.WAITING:
             return <p>Loading...</p>
         case LoadingState.NO_DEVICE:
-            return <>
-                <p>No device found.</p>
-                <Button
-                    onClick={() => checkForInputs(setLoadState, setDevices)}
-                    text="Rescan"
-                    canSubmit
-                />
-            </>
         case LoadingState.SELECTING_DEVICE:
             return <>
+                <p className="text-center">No device selected</p>
                 <Button
                     onClick={() => setModalOpen(true)}
                     text="Select MIDI device"
@@ -160,7 +150,7 @@ function PageContent() {
                 />
             </>
         case LoadingState.DEVICE_SELECTED:
-            return <MidiContent />
+            return <MidiContent/>
     }
 }
 
@@ -222,7 +212,7 @@ export default function Home() {
         if (deviceId && !modalOpen) {
             newRandomChord();
         }
-    }, [modalOpen]);
+    }, [deviceId, modalOpen]);
 
     const adjustNote = (note: string) => {
         switch (note) {
@@ -379,8 +369,8 @@ export default function Home() {
                 setCanInput(true);
             }, 1000);
         }
-    }, [notes]);
-    
+    }, [canInput, chord, newRandomKey, notes, successes, total]);
+
     return (
         <div>
             <Head>
@@ -425,7 +415,7 @@ export default function Home() {
 
                 <div className="flex justify-center gap-4 text-xl">
                     <p>{successes}/{total}</p>
-                    <p>{isNaN(successes/total) ? "0" : Math.round(100 * successes/total)}%</p>
+                    <p>{isNaN(successes / total) ? "0" : Math.round(100 * successes / total)}%</p>
                 </div>
 
                 <p className="text-xl">
