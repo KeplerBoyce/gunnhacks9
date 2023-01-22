@@ -1,7 +1,5 @@
-import { detectContentType } from 'next/dist/server/image-optimizer';
-import React, { useRef, useLayoutEffect, useState, useEffect } from 'react'
+import React, {useEffect, useLayoutEffect, useRef, useState} from 'react'
 import VexFlow from 'vexflow'
-import { StaveLine } from 'vexflow';
 
 const VF = VexFlow.Flow
 const { Formatter, Renderer, Stave, StaveNote, Accidental } = VF
