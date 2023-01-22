@@ -1,5 +1,7 @@
+import { detectContentType } from 'next/dist/server/image-optimizer';
 import React, { useRef, useLayoutEffect, useState, useEffect } from 'react'
 import VexFlow from 'vexflow'
+import { StaveLine } from 'vexflow';
 
 const VF = VexFlow.Flow
 const { Formatter, Renderer, Stave, StaveNote, Accidental } = VF
@@ -54,6 +56,7 @@ export default function Score({
                 timeSignature && stave.addTimeSignature(timeSignature);
             }
             currX += stave.getWidth()
+            stave.options.fill_style = "black";
             stave.setContext(context).draw()
 
             const processedNotes = notes.map(({ keys, duration = 'q' }) => {
