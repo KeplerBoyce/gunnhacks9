@@ -2,6 +2,7 @@ import { Clefs, Keys, NoteTypes } from "../util/types";
 import CenteredModal from "./CenteredModal";
 import ToggleButton from "./ToggleButton";
 import ToggleButtonGroup from "./ToggleButtonGroup";
+import Button from "./Button";
 
 export default function OptionsModal(props: {
     isOpen: boolean,
@@ -214,6 +215,8 @@ export default function OptionsModal(props: {
                         text="Chords + Inversions"
                     />
                 </ToggleButtonGroup>
+
+                <Button text="Save and Close" onClick={() => setIsOpen(false)} canSubmit={false}/>
             </div>
         </CenteredModal>
     )
