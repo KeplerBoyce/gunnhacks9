@@ -108,15 +108,20 @@ function DeviceSelectForm() {
     return (
         <CenteredModal isOpen={modalOpen} setIsOpen={setModalOpen} clickToClose={false}>
             <div className="flex flex-col gap-4 bg-white px-8 py-6 rounded-lg">
+                <button
+                    onClick={() => setModalOpen(false)}
+                    className="absolute top-0 right-2 text-5xl">
+                    ×
+                </button>
                 <h1 className="text-xl font-bold">
                     Select a MIDI device
                 </h1>
-                <div className="flex flex-col">
+                <div className="flex flex-col gap-1">
                     {devices.length > 0 && devices.map(device => (
                         <button
                             onClick={() => handleSubmit(device.id)}
                             key={device.id}
-                            className="px-2 py-1 rounded-lg cursor-pointer bg-gray-200 hover:bg-blue-400 duration-200"
+                            className="px-2 py-1 rounded-lg cursor-pointer bg-gray-200 hover:bg-gray-300 duration-200"
                         >
                             {device.name}
                         </button>
@@ -215,12 +220,12 @@ export default function Home() {
             .then(() => checkForInputs(setLoadState, setDevices))
             .catch(err => alert(err));
         newRandomChord();
-        Soundfont.instrument(new AudioContext(), 'acoustic_grand_piano').then(function (piano) {
+        Soundfont.instrument(new AudioContext(), 'acoustic_grand_piano', {gain: 600}).then(function (piano) {
             window.navigator.requestMIDIAccess().then(function (midiAccess) {
                 midiAccess.inputs.forEach(function (midiInput) {
-                  piano.listenToMidi(midiInput)
+                    piano.listenToMidi(midiInput)
                 })
-              })
+            })
         })
     }, [])
 
