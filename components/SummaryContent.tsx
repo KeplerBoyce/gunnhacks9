@@ -13,7 +13,7 @@ export default function SummaryContent() {
                     <>
                         <div className="flex flex-col m-3">
                             <h2 className="text-3xl font-semibold">Score</h2>
-                            <p>{successes} correct out of {total} ({successes / total}%)</p>
+                            <p>{successes} correct out of {total} {(100 * successes / total).toFixed(2)}%</p>
                         </div>
                         <div className="flex flex-col m-3">
                             <h2 className="text-3xl font-semibold">Time</h2>
