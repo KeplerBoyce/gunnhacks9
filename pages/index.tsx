@@ -1,12 +1,13 @@
 import Head from "next/head";
 import {Input, NoteMessageEvent, WebMidi} from "webmidi";
 import {createContext, useContext, useEffect, useState} from "react";
-import CenteredModal from "../components/CenteredModal";
 import Button from "../components/Button";
 import Score from "../components/Score";
 import OptionsModal from "../components/OptionsModal";
 import {defaultClefs, defaultKeys, defaultNoteTypes} from "../util/types";
 import Soundfont from "soundfont-player"
+import {clearInterval} from "timers";
+import DeviceSelectionModal from "../components/DeviceSelectionModal"
 
 type Chord = string[];
 
@@ -49,7 +50,7 @@ type LoadStateSetter = (x: LoadingState) => void;
 type DevicesSetter = (x: DeviceInput[]) => void;
 type NoteSetter = (arg: Note[] | ((x: Note[]) => Note[])) => void;
 
-enum LoadingState {
+export enum LoadingState {
     WAITING, SELECTING_DEVICE, DEVICE_SELECTED
 }
 
@@ -61,7 +62,7 @@ type AllProps = {
     notes: Note[], setNotes: NoteSetter,
 }
 
-const MidiContext = createContext<AllProps>({
+export const MidiContext = createContext<AllProps>({
     modalOpen: true, setModalOpen: () => {},
     loadState: LoadingState.WAITING, setLoadState(): void {},
     deviceId: "", setDeviceId(): void {},
@@ -105,37 +106,7 @@ function DeviceSelectForm() {
         setModalOpen(false);
     }
 
-    return (
-        <CenteredModal isOpen={modalOpen} setIsOpen={setModalOpen} clickToClose={false}>
-            <div className="flex flex-col gap-4 bg-white px-8 py-6 rounded-lg">
-                <button
-                    onClick={() => setModalOpen(false)}
-                    className="absolute top-0 right-2 text-5xl">
-                    ×
-                </button>
-                <h1 className="text-xl font-bold">
-                    Select a MIDI device
-                </h1>
-                <div className="flex flex-col gap-1">
-                    {devices.length > 0 && devices.map(device => (
-                        <button
-                            onClick={() => handleSubmit(device.id)}
-                            key={device.id}
-                            className="px-2 py-1 rounded-lg cursor-pointer bg-gray-200 hover:bg-gray-300 duration-200"
-                        >
-                            {device.name}
-                        </button>
-                    ))}
-                    {devices.length == 0 && <p className="text-center">No devices found</p>}
-                </div>
-                <Button
-                    onClick={() => checkForInputs(setLoadState, setDevices)}
-                    text="Rescan"
-                    canSubmit
-                />
-            </div>
-        </CenteredModal>
-    );
+    return <DeviceSelectionModal isOpen={modalOpen} setIsOpen={setModalOpen}/>;
 }
 
 function PageContent() {
@@ -156,15 +127,6 @@ function PageContent() {
         case LoadingState.DEVICE_SELECTED:
             return <MidiContent/>
     }
-}
-
-function checkForInputs(setLoadState: LoadStateSetter, setDevices: DevicesSetter) {
-    // console.log("Inputs:")
-    // console.log(WebMidi.inputs)
-    // Display available MIDI input devices
-
-    setLoadState(LoadingState.SELECTING_DEVICE);
-    setDevices(WebMidi.inputs.slice()); // use a copy so that the references are different and a rerender is triggered
 }
 
 export default function Home() {
@@ -217,7 +179,10 @@ export default function Home() {
     useEffect(() => {
         WebMidi
             .enable()
-            .then(() => checkForInputs(setLoadState, setDevices))
+            .then(() => {
+                setLoadState(LoadingState.SELECTING_DEVICE);
+                setDevices(WebMidi.inputs.slice());
+            })
             .catch(err => alert(err));
         newRandomChord();
         Soundfont.instrument(new AudioContext(), 'acoustic_grand_piano', {gain: 600}).then(function (piano) {
