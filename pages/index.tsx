@@ -49,7 +49,7 @@ type DevicesSetter = (x: DeviceInput[]) => void;
 type NoteSetter = (arg: Note[] | ((x: Note[]) => Note[])) => void;
 
 enum LoadingState {
-    WAITING, NO_DEVICE, SELECTING_DEVICE, DEVICE_SELECTED
+    WAITING, SELECTING_DEVICE, DEVICE_SELECTED
 }
 
 type AllProps = {
@@ -115,8 +115,7 @@ function DeviceSelectForm() {
                         <button
                             onClick={() => handleSubmit(device.id)}
                             key={device.id}
-                            className={"duration-200 px-2 py-1 rounded-lg cursor-pointer "
-                                + (deviceId === device.id ? "bg-blue-300 hover:bg-blue-400" : "hover:bg-gray-200")}
+                            className="px-2 py-1 rounded-lg cursor-pointer bg-gray-200 hover:bg-blue-400 duration-200"
                         >
                             {device.name}
                         </button>
@@ -138,7 +137,6 @@ function PageContent() {
     switch (loadState) {
         case LoadingState.WAITING:
             return <p>Loading...</p>
-        case LoadingState.NO_DEVICE:
         case LoadingState.SELECTING_DEVICE:
             return <>
                 <p className="text-center">No device selected</p>
@@ -159,9 +157,7 @@ function checkForInputs(setLoadState: LoadStateSetter, setDevices: DevicesSetter
     // console.log(WebMidi.inputs)
     // Display available MIDI input devices
 
-    if (WebMidi.inputs.length >= 1) setLoadState(LoadingState.SELECTING_DEVICE);
-    else setLoadState(LoadingState.NO_DEVICE);
-
+    setLoadState(LoadingState.SELECTING_DEVICE);
     setDevices(WebMidi.inputs.slice()); // use a copy so that the references are different and a rerender is triggered
 }
 
