@@ -298,17 +298,12 @@ export default function Home() {
                     />
                 }
 
-                <div className="flex justify-center gap-4 text-xl">
-                    <p>{successes}/{total}</p>
-                    <p>{isNaN(successes / total) ? "0" : Math.round(100 * successes / total)}%</p>
-                    <p>{(timerMs / 1000).toFixed(2)}s</p>
-                    <p>Mean Time: {isNaN(meanTime) ? "---" : (meanTime / 1000).toFixed(2) + "s"}</p>
-                </div>
-
                 {deviceId &&
                     <div className="flex justify-center gap-4 text-xl">
                         <p>{successes}/{total}</p>
                         <p>{isNaN(successes / total) ? "0" : Math.round(100 * successes / total)}%</p>
+                        <p>{(timerMs / 1000).toFixed(2)}s</p>
+                        <p>Mean Time: {isNaN(meanTime) ? "---" : (meanTime / 1000).toFixed(2) + "s"}</p>
                     </div>
                 }
 
