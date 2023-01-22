@@ -152,21 +152,8 @@ export default function Home() {
     const newRandomChord = () => {
         const chordKeys = Object.keys(CHORDS);
         const rand = Math.floor(Math.random() * Object.keys(CHORDS).length);
-        let tempChord = CHORDS[chordKeys[rand]];
-        if (nextClef === "bass") {
-            tempChord = tempChord.map(note =>
-                note.slice(0, note.length - 1) + (parseInt(note.slice(note.length - 1)) - 2)
-            );
-        }
-        setChord(tempChord);
+        setChord(CHORDS[chordKeys[rand]]);
         setNotes([]);
-    }
-
-    const newRandomClef = () => {
-        const chosenClefs = Object.entries(clefs)
-            .filter(([k, v]) => !!v)
-            .map(([k, v]) => k);
-        setNextClef(chosenClefs[Math.floor(Math.random() * chosenClefs.length)]);
     }
 
     const newRandomKey = () => {
@@ -185,12 +172,12 @@ export default function Home() {
             })
             .catch(err => alert(err));
         newRandomChord();
-        Soundfont.instrument(new AudioContext(), 'acoustic_grand_piano', {gain: 600}).then(function (piano) {
+        Soundfont.instrument(new AudioContext(), 'acoustic_grand_piano').then(function (piano) {
             window.navigator.requestMIDIAccess().then(function (midiAccess) {
                 midiAccess.inputs.forEach(function (midiInput) {
-                    piano.listenToMidi(midiInput)
+                  piano.listenToMidi(midiInput)
                 })
-            })
+              })
         })
     }, [])
 
@@ -203,52 +190,6 @@ export default function Home() {
 
     const adjustNote = (note: string) => {
         switch (note) {
-            case "ab/2":
-            case "AB2":
-                return "G#2";
-            case "bb/2":
-            case "Bb2":
-                return "A#2";
-            case "B#/2":
-            case "B#2":
-                return "C3";
-            case "db/2":
-            case "Db2":
-                return "C#2";
-            case "eb/2":
-            case "Eb2":
-                return "D#2";
-            case "fb/2":
-                return "E2";
-            case "e#/2":
-            case "E#2":
-                return "F2";
-            case "gb/2":
-            case "Gb2":
-                return "F#2";
-            case "ab/3":
-            case "AB3":
-                return "G#3";
-            case "bb/3":
-            case "Bb3":
-                return "A#3";
-            case "B#/3":
-            case "B#3":
-                return "C4";
-            case "db/3":
-            case "Db3":
-                return "C#3";
-            case "eb/3":
-            case "Eb3":
-                return "D#3";
-            case "fb/3":
-                return "E3";
-            case "e#/3":
-            case "E#3":
-                return "F3";
-            case "gb/3":
-            case "Gb3":
-                return "F#3";
             case "ab/4":
             case "Ab4":
                 return "G#4";
@@ -274,9 +215,6 @@ export default function Home() {
                 return "F#4";
             case "cb/5":
                 return "B4";
-            case "ab/5":
-            case "Ab5":
-                return "G#5";
             case "B#/5":
             case "B#5":
                 return "C6";
@@ -382,12 +320,11 @@ export default function Home() {
         let adjustedChord = chord.map(note => adjustNote(note));
         notes.forEach(note => {
             if (!adjustedChord.includes(adjustNote(note))) {// incorrect
-                newRandomClef();
-                newRandomKey();
                 setCanInput(false);
                 setTotal(total + 1);
                 setText("Incorrect...");
                 setTimeout(() => {// 1s delay before continuing
+                    newRandomKey();
                     newRandomChord();
                     setText("");
                     setCanInput(true);
@@ -395,13 +332,12 @@ export default function Home() {
             }
         });
         if (adjustedChord.every(note => notes.includes(adjustNote(note)))) {// correct
-            newRandomClef();
-            newRandomKey();
             setCanInput(false);
             setSuccesses(successes + 1);
             setTotal(total + 1);
             setText("Correct!");
             setTimeout(() => {// 1s delay before continuing
+                newRandomKey();
                 newRandomChord();
                 setText("");
                 setCanInput(true);
@@ -432,7 +368,6 @@ export default function Home() {
                 {chord &&
                     <Score
                         className="w-1/2 h-full"
-                        clef={nextClef}
                         keySignature={nextKey}
                         staves={notes.length === 0 ? [
                             [{
