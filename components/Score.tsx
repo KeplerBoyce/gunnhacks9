@@ -58,6 +58,7 @@ export default function Score({
 
             const processedNotes = notes.map(({ keys, duration = 'q' }) => {
                 let note = new StaveNote({
+                    clef,
                     keys,
                     duration,
                 });
