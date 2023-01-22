@@ -100,20 +100,6 @@ function MidiContent() {
     </div>
 }
 
-function DeviceSelectForm() {
-    const {modalOpen, setModalOpen, devices, setLoadState, setDevices, deviceId, setDeviceId} = useContext(MidiContext);
-    // console.log("Devices:")
-    // console.log(devices)
-
-    const handleSubmit = (submittedDeviceId: string) => {
-        setDeviceId(submittedDeviceId);
-        setLoadState(LoadingState.DEVICE_SELECTED);
-        setModalOpen(false);
-    }
-
-    return <DeviceSelectionModal isOpen={modalOpen} setIsOpen={setModalOpen}/>;
-}
-
 function PageContent() {
     const {setModalOpen, loadState, setLoadState, setDevices} = useContext(MidiContext);
     switch (loadState) {
@@ -426,7 +412,7 @@ export default function Home() {
                 <div className="flex flex-col justify-center">
                     <MidiContextProvider value={{modalOpen, setModalOpen, loadState, setLoadState, deviceId, setDeviceId, devices, setDevices, notes, setNotes}}>
                         <PageContent />
-                        <DeviceSelectForm />
+                        <DeviceSelectionModal isOpen={modalOpen} setIsOpen={setModalOpen}/>
                     </MidiContextProvider>
                 </div>
 
