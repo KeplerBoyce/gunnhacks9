@@ -7,6 +7,7 @@ import OptionsModal from "../components/OptionsModal";
 import {defaultClefs, defaultKeys, defaultNoteTypes} from "../util/types";
 import Soundfont from "soundfont-player";
 import DeviceSelectionModal from "../components/DeviceSelectionModal";
+import { CLIENT_STATIC_FILES_RUNTIME } from "next/dist/shared/lib/constants";
 
 type Chord = string[];
 
@@ -167,6 +168,18 @@ export default function Home() {
         setNextKey(chosenKeys[Math.floor(Math.random() * chosenKeys.length)]);
     }
 
+    const [startTime, setStartTime] = useState(Date.now());
+
+    const [realStartTime, setRealStartTime] = useState(Date.now());
+
+    const [currentTime, setNowTime] = useState(Date.now());
+
+
+    const resetTimer = () => {
+        setStartTime(Date.now());
+    }
+
+
     useEffect(() => {
         WebMidi
             .enable()
@@ -183,6 +196,14 @@ export default function Home() {
                 })
               })
         })
+    }, [])
+
+    useEffect(() => {
+        setRealStartTime(Date.now)
+        const id = setInterval(() => {
+            setNowTime(Date.now())
+        }, 10)
+        return () => clearInterval(id);
     }, [])
 
     // generate new chord after connecting MIDI device
@@ -392,6 +413,8 @@ export default function Home() {
                 }
 
                 <div className="flex justify-center gap-4 text-xl">
+                    <p>{((currentTime - startTime)/1000).toFixed(2)}s</p>
+                    <p>Mean Time: {((currentTime - realStartTime)/(1000 * (total + 1))).toFixed(2)}s</p>
                     <p>{successes}/{total}</p>
                     <p>{isNaN(successes / total) ? "0" : Math.round(100 * successes / total)}%</p>
                 </div>
