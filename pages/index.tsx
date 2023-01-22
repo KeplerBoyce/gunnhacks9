@@ -51,6 +51,13 @@ export default function Home() {
         setNotes([]);
     }
 
+    const newRandomClef = () => {
+        const chosenClefs = Object.entries(clefs)
+            .filter(([k, v]) => !!v)
+            .map(([k, v]) => k);
+        setNextClef(chosenClefs[Math.floor(Math.random() * chosenClefs.length)]);
+    }
+
     const newRandomKey = () => {
         const chosenKeys = Object.entries(keys)
             .filter(([k, v]) => !!v)
@@ -98,6 +105,56 @@ export default function Home() {
 
     const adjustNote = (note: string) => {
         switch (note) {
+            case "ab/2":
+            case "Ab2":
+                return "G#2";
+            case "bb/2":
+            case "Bb2":
+                return "A#2";
+            case "B#/2":
+            case "B#2":
+                return "C3";
+            case "db/2":
+            case "Db2":
+                return "C#2";
+            case "eb/2":
+            case "Eb2":
+                return "D#2";
+            case "fb/2":
+                return "E3";
+            case "e#/2":
+            case "E#2":
+                return "F2";
+            case "gb/2":
+            case "Gb2":
+                return "F#2";
+            case "cb/3":
+                return "B2";
+            case "ab/3":
+            case "Ab3":
+                return "G#3";
+            case "bb/3":
+            case "Bb3":
+                return "A#3";
+            case "B#/3":
+            case "B#3":
+                return "C4";
+            case "db/3":
+            case "Db3":
+                return "C#3";
+            case "eb/3":
+            case "Eb3":
+                return "D#3";
+            case "fb/3":
+                return "E4";
+            case "e#/3":
+            case "E#3":
+                return "F3";
+            case "gb/3":
+            case "Gb3":
+                return "F#3";
+            case "cb/4":
+                return "B3";
             case "ab/4":
             case "Ab4":
                 return "G#4";
@@ -153,6 +210,66 @@ export default function Home() {
         if (!chord) return str2;
         let str3 = "";
         switch (str2) {
+            case "a#/2":
+                str3 = "bb/2";
+                break;
+            case "b/2":
+                str3 = "cb/3";
+                break;
+            case "b#/2":
+                str3 = "c/3";
+                break;
+            case "c#/2":
+                str3 = "db/2";
+                break;
+            case "d#/2":
+                str3 = "eb/2";
+                break;
+            case "e/2":
+                str3 = "fb/2";
+                break;
+            case "e#/2":
+                str3 = "f/2";
+                break;
+            case "f/2":
+                str3 = "e#/2";
+                break;
+            case "f#/2":
+                str3 = "gb/2";
+                break;
+            case "g#/2":
+                str3 = "ab/2";
+                break;
+            case "a#/3":
+                str3 = "bb/3";
+                break;
+            case "b/3":
+                str3 = "cb/4";
+                break;
+            case "b#/3":
+                str3 = "c/4";
+                break;
+            case "c#/3":
+                str3 = "db/3";
+                break;
+            case "d#/3":
+                str3 = "eb/3";
+                break;
+            case "e/3":
+                str3 = "fb/3";
+                break;
+            case "e#/3":
+                str3 = "f/3";
+                break;
+            case "f/3":
+                str3 = "e#/3";
+                break;
+            case "f#/3":
+                str3 = "gb/3";
+                break;
+            case "g#/3":
+                str3 = "ab/3";
+                break;
             case "a#/4":
                 str3 = "bb/4";
                 break;
@@ -224,6 +341,10 @@ export default function Home() {
     }
 
     useEffect(() => {
+        newRandomChord();
+    }, [nextClef]);
+
+    useEffect(() => {
         if (!chord || !canInput) return;
         let adjustedChord = chord.map(note => adjustNote(note));
         notes.forEach(note => {
@@ -234,6 +355,7 @@ export default function Home() {
                 stopTimer();
                 setTimeout(() => {// 1s delay before continuing
                     newRandomKey();
+                    newRandomClef();
                     newRandomChord();
                     setText("");
                     setCanInput(true);
@@ -249,6 +371,7 @@ export default function Home() {
             stopTimer();
             setTimeout(() => {// 1s delay before continuing
                 newRandomKey();
+                newRandomClef();
                 newRandomChord();
                 setText("");
                 setCanInput(true);
@@ -282,6 +405,7 @@ export default function Home() {
                     {chord &&
                         <Score
                             className="w-1/2 h-full"
+                            clef={nextClef}
                             keySignature={nextKey}
                             staves={notes.length === 0 ? [
                                 [{
