@@ -13,7 +13,7 @@ export default function DeviceSelectionModal(props: {isOpen: boolean, setIsOpen:
     }
 
     return (
-        <CenteredModal isOpen={props.isOpen} setIsOpen={props.setIsOpen} clickToClose={false}>
+        <CenteredModal isOpen={props.isOpen} setIsOpen={props.setIsOpen} clickToClose={true}>
             <div className="flex flex-col gap-4 bg-white px-8 py-6 rounded-lg">
                 <button
                     onClick={() => props.setIsOpen(false)}
