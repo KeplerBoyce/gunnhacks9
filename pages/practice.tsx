@@ -68,14 +68,16 @@ const MidiContext = createContext<AllProps>({
 const MidiContextProvider = MidiContext.Provider;
 
 function MidiContent() {
-    const {devices, deviceId, notes, setNotes} = useContext(MidiContext);
+    const {deviceId, notes, setNotes} = useContext(MidiContext);
     
     useEffect(() => {
         const midi = WebMidi.getInputById(deviceId)
         const callback = (e: NoteMessageEvent) => {
-            setNotes((prevState) => [
-                ...prevState, e.note.identifier
-            ]);
+            if (!notes.includes(e.note.identifier)) {
+                setNotes((prevState) => [
+                    ...prevState, e.note.identifier
+                ]);
+            }
         }
         midi.channels.forEach(channel => channel.addListener("noteon", callback));
         return () => {
@@ -293,6 +295,9 @@ export default function Midi() {
                 break;
             case "e#/5":
                 str3 = "f/5";
+                break;
+            case "f#/5":
+                str3 = "gb/5";
                 break;
         }
         if (chord.includes(str3)) {
