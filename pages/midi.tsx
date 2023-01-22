@@ -49,8 +49,10 @@ function DeviceSelectForm() {
         <form onSubmit={() => setLoadState(LoadingState.DEVICE_SELECTED)}>
             {devices.map(device => (
                 <div key={device.name}>
-                    <input type="radio" required onChange={() => setDeviceId(device.id)} />
-                    <label>{device.name}</label>
+                    <label>
+                        <input type="radio" required onChange={() => setDeviceId(device.id)} />
+                        {device.name}
+                    </label>
                 </div>
             ))}
             <button type="submit">Select Device</button>
