@@ -31,7 +31,7 @@ export type Keys = {
 export type NoteTypes = {
     single: boolean,
     chords: boolean,
-    inversions: boolean,
+    // inversions: boolean,
 }
 
 export const defaultChordSets = {
@@ -67,8 +67,17 @@ export const defaultKeys = {
 export const defaultNoteTypes = {
     single: false,
     chords: true,
-    inversions: false,
+    // inversions: false,
 }
+
+export type Note = string;
+
+export const NOTES: Note[] = [
+    "c/4", "c#/4", "db/4", "d/4", "d#/4", "eb/4", "e/4", "e#/4", "fb/4", "f/4",
+    "f#/4", "g/4", "g#/4", "ab/4", "a/4", "a#/4", "bb/4", "b/4", "b#/4", "cb/5",
+    "c/5", "c#/5", "db/5", "d/5", "d#/5", "eb/5", "e/5", "e#/5", "fb/5", "f/5",
+    "f#/5", "g/5", "g#/5", "ab/5", "a/5", "a#/5", "bb/5", "b/5", "b#/5", "c/6",
+]
 
 export type Chord = string[];
 

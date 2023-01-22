@@ -95,13 +95,13 @@ export default function OptionsModal(props: {
             setNoteTypes({
                 single: false,
                 chords: false,
-                inversions: false,
+                // inversions: false,
             });
         } else {
             setNoteTypes({
                 single: true,
                 chords: true,
-                inversions: true,
+                // inversions: true,
             });
         }
     }
@@ -255,11 +255,11 @@ export default function OptionsModal(props: {
                         callback={() => setNoteTypes({...noteTypes, chords: !noteTypes.chords})}
                         text="Chords"
                     />
-                    <ToggleButton
+                    {/* <ToggleButton
                         isOn={noteTypes.inversions}
                         callback={() => setNoteTypes({...noteTypes, inversions: !noteTypes.inversions})}
                         text="Chords + Inversions"
-                    />
+                    /> */}
                 </ToggleButtonGroup>
 
                 <Button text="Save and Close" onClick={() => setIsOpen(false)} canSubmit={true}/>

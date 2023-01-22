@@ -8,7 +8,7 @@ import OptionsModal from "../components/OptionsModal";
 import PageContent from "../components/PageContent";
 import Score from "../components/Score";
 import {DeviceInput, LoadingState, MidiContextProvider, Note} from "../util/MidiContext";
-import {Chord, CHORDS, defaultChordSets, defaultClefs, defaultKeys, defaultNoteTypes} from "../util/types";
+import {Chord, CHORDS, defaultChordSets, defaultClefs, defaultKeys, defaultNoteTypes, NOTES} from "../util/types";
 
 export default function Home() {
     const [loadState, setLoadState] = useState(LoadingState.WAITING);
@@ -40,13 +40,20 @@ export default function Home() {
 
     const newRandomChord = () => {
         let selectedChords: Chord[] = [];
-        Object.entries(chordSets)
-            .filter(([k, v]) => !!v)
-            .forEach(([k, v]) => {
-                Object.values(CHORDS[k]).forEach((c) => {
-                    selectedChords.push(c);
-                });
+        if (noteTypes.single) {
+            NOTES.forEach((c) => {
+                selectedChords.push([c]);
             });
+        }
+        if (noteTypes.chords) {
+            Object.entries(chordSets)
+                .filter(([k, v]) => !!v)
+                .forEach(([k, v]) => {
+                    Object.values(CHORDS[k]).forEach((c) => {
+                        selectedChords.push(c);
+                    });
+                });
+        }
         const rand = Math.floor(Math.random() * selectedChords.length);
         let tempChord = selectedChords[rand];
         if (nextClef === "bass") {
@@ -139,7 +146,7 @@ export default function Home() {
             case "bb/3":
             case "Bb3":
                 return "A#3";
-            case "B#/3":
+            case "b#/3":
             case "B#3":
                 return "C4";
             case "db/3":
