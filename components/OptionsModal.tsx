@@ -1,4 +1,4 @@
-import { Clefs, Keys, NoteTypes } from "../util/types";
+import { ChordSets, Clefs, Keys, NoteTypes } from "../util/types";
 import CenteredModal from "./CenteredModal";
 import ToggleButton from "./ToggleButton";
 import ToggleButtonGroup from "./ToggleButtonGroup";
@@ -7,6 +7,8 @@ import Button from "./Button";
 export default function OptionsModal(props: {
     isOpen: boolean,
     setIsOpen: (x: boolean) => void,
+    chordSets: ChordSets,
+    setChordSets: (x: ChordSets) => void,
     clefs: Clefs,
     setClefs: (x: Clefs) => void,
     keys: Keys,
@@ -14,7 +16,25 @@ export default function OptionsModal(props: {
     noteTypes: NoteTypes,
     setNoteTypes: (x: NoteTypes) => void,
 }) {
-    const {isOpen, setIsOpen, clefs, setClefs, keys, setKeys, noteTypes, setNoteTypes} = props;
+    const {isOpen, setIsOpen, chordSets, setChordSets, clefs, setClefs, keys, setKeys, noteTypes, setNoteTypes} = props;
+
+    const setAllChordSets = () => {
+        if (Object.values(chordSets).every(v => v)) {
+            setChordSets({
+                major: false,
+                minor: false,
+                majorSeventh: false,
+                minorSeventh: false,
+            });
+        } else {
+            setChordSets({
+                major: true,
+                minor: true,
+                majorSeventh: true,
+                minorSeventh: true,
+            });
+        }
+    }
 
     const setAllClefs = () => {
         if (Object.values(clefs).every(v => v)) {
@@ -97,6 +117,32 @@ export default function OptionsModal(props: {
                 <h1 className="text-xl font-bold">
                     Options
                 </h1>
+                <ToggleButtonGroup
+                    title="All chord types"
+                    isOn={Object.values(chordSets).every(v => v)}
+                    callback={setAllChordSets}
+                >
+                    <ToggleButton
+                        isOn={chordSets.major}
+                        callback={() => setChordSets({...chordSets, major: !chordSets.major})}
+                        text="Major"
+                    />
+                    <ToggleButton
+                        isOn={chordSets.minor}
+                        callback={() => setChordSets({...chordSets, minor: !chordSets.minor})}
+                        text="Minor"
+                    />
+                    <ToggleButton
+                        isOn={chordSets.majorSeventh}
+                        callback={() => setChordSets({...chordSets, majorSeventh: !chordSets.majorSeventh})}
+                        text="Major Seventh"
+                    />
+                    <ToggleButton
+                        isOn={chordSets.minorSeventh}
+                        callback={() => setChordSets({...chordSets, minorSeventh: !chordSets.minorSeventh})}
+                        text="Minor Seventh"
+                    />
+                </ToggleButtonGroup>
                 <ToggleButtonGroup
                     title="All clefs"
                     isOn={Object.values(clefs).every(v => v)}

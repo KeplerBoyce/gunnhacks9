@@ -1,3 +1,10 @@
+export type ChordSets = {
+    major: boolean,
+    minor: boolean,
+    majorSeventh: boolean,
+    minorSeventh: boolean,
+}
+
 export type Clefs = {
     treble: boolean,
     bass: boolean,
@@ -25,6 +32,13 @@ export type NoteTypes = {
     single: boolean,
     chords: boolean,
     inversions: boolean,
+}
+
+export const defaultChordSets = {
+    major: true,
+    minor: true,
+    majorSeventh: false,
+    minorSeventh: false,
 }
 
 export const defaultClefs = {

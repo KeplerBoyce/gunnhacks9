@@ -8,41 +8,62 @@ import OptionsModal from "../components/OptionsModal";
 import PageContent from "../components/PageContent";
 import Score from "../components/Score";
 import {DeviceInput, LoadingState, MidiContextProvider, Note} from "../util/MidiContext";
-import {defaultClefs, defaultKeys, defaultNoteTypes} from "../util/types";
+import {defaultChordSets, defaultClefs, defaultKeys, defaultNoteTypes} from "../util/types";
 
 type Chord = string[];
 
-const CHORDS: { [name: string]: Chord } = {
-    A: ["a/4", "c/5", "e/5"],
-    B: ["b/4", "d#/5", "f#/5"],
-    C: ["c/4", "e/4", "g/4"],
-    D: ["d/4", "f#/4", "a/4"],
-    E: ["e/4", "g#/4", "b/4"],
-    F: ["f/4", "a/4", "c/5"],
-    G: ["g/4", "b/4", "d/5"],
-    Ab: ["ab/4", "c/5", "eb/5"],
-    Bb: ["bb/4", "d/5", "f/5"],
-    Cb: ["cb/5", "eb/5", "gb/5"],
-    Db: ["db/4", "f/4", "ab/4"],
-    Eb: ["eb/4", "g/4", "bb/4"],
-    Gb: ["gb/4", "bb/4", "db/5"],
-    Cs: ["c#/4", "e#/4", "g#/4"],
-    Fs: ["f#/4", "a#/4", "c#/5"],
-    a: ["a/4", "c/5", "e/5"],
-    b: ["b/4", "d/5", "f#/5"],
-    c: ["c/4", "eb/4", "g/4"],
-    d: ["d/4", "f/4", "a/4"],
-    e: ["e/4", "g/4", "b/4"],
-    f: ["f/4", "ab/4", "c/5"],
-    g: ["g/4", "bb/4", "d/5"],
-    ab: ["ab/4", "cb/5", "eb/5"],
-    bb: ["bb/4", "db/5", "f/5"],
-    eb: ["eb/4", "gb/4", "bb/4"],
-    as: ["a#/4", "c#/5", "e#/5"],
-    cs: ["c#/4", "e/4", "g#/4"],
-    ds: ["d#/4", "f#/4", "a#/4"],
-    fs: ["f#/4", "a/4", "c#/5"],
-    gs: ["g#/4", "b/4", "d#/5"],
+const CHORDS: { [q: string]: { [x: string]: Chord } } = {
+    major: {
+        A: ["a/4", "c#/5", "e/5"],
+        B: ["b/4", "d#/5", "f#/5"],
+        C: ["c/4", "e/4", "g/4"],
+        D: ["d/4", "f#/4", "a/4"],
+        E: ["e/4", "g#/4", "b/4"],
+        F: ["f/4", "a/4", "c/5"],
+        G: ["g/4", "b/4", "d/5"],
+        Ab: ["ab/4", "c/5", "eb/5"],
+        Bb: ["bb/4", "d/5", "f/5"],
+        Cb: ["cb/5", "eb/5", "gb/5"],
+        Db: ["db/4", "f/4", "ab/4"],
+        Eb: ["eb/4", "g/4", "bb/4"],
+        Gb: ["gb/4", "bb/4", "db/5"],
+        Cs: ["c#/4", "e#/4", "g#/4"],
+        Fs: ["f#/4", "a#/4", "c#/5"],
+    },
+    minor: {
+        a: ["a/4", "c/5", "e/5"],
+        b: ["b/4", "d/5", "f#/5"],
+        c: ["c/4", "eb/4", "g/4"],
+        d: ["d/4", "f/4", "a/4"],
+        e: ["e/4", "g/4", "b/4"],
+        f: ["f/4", "ab/4", "c/5"],
+        g: ["g/4", "bb/4", "d/5"],
+        ab: ["ab/4", "cb/5", "eb/5"],
+        bb: ["bb/4", "db/5", "f/5"],
+        eb: ["eb/4", "gb/4", "bb/4"],
+        as: ["a#/4", "c#/5", "e#/5"],
+        cs: ["c#/4", "e/4", "g#/4"],
+        ds: ["d#/4", "f#/4", "a#/4"],
+        fs: ["f#/4", "a/4", "c#/5"],
+        gs: ["g#/4", "b/4", "d#/5"],
+    },
+    majorSeventh: {
+        A: ["a/4", "c#/5", "e/5", "g#/5"],
+        B: ["b/4", "d#/5", "f#/5", "a#/5"],
+        C: ["c/4", "e/4", "g/4", "b/4"],
+        D: ["d/4", "f#/4", "a/4", "c#/5"],
+        E: ["e/4", "g#/4", "b/4", "d#/5"],
+        F: ["f/4", "a/4", "c/5", "e/5"],
+        G: ["g/4", "b/4", "d/5", "f/5"],
+        Ab: ["ab/4", "c/5", "eb/5", "g/5"],
+        Bb: ["bb/4", "d/5", "f/5", "a/5"],
+        Cb: ["cb/5", "eb/5", "gb/5", "bb/5"],
+        Db: ["db/4", "f/4", "ab/4", "c/5"],
+        Eb: ["eb/4", "g/4", "bb/4", "d/5"],
+        Gb: ["gb/4", "bb/4", "db/5", "f/5"],
+        Cs: ["c#/4", "e#/4", "g#/4", "b#/4"],
+        Fs: ["f#/4", "a#/4", "c#/5", "e#/5"],
+    },
 }
 
 export default function Home() {
@@ -59,6 +80,7 @@ export default function Home() {
     const [text, setText] = useState("");
     const [canInput, setCanInput] = useState(true);
 
+    const [chordSets, setChordSets] = useState(defaultChordSets);
     const [clefs, setClefs] = useState(defaultClefs);
     const [keys, setKeys] = useState(defaultKeys);
     const [noteTypes, setNoteTypes] = useState(defaultNoteTypes);
@@ -66,9 +88,18 @@ export default function Home() {
     const [nextKey, setNextKey] = useState("C");
 
     const newRandomChord = () => {
-        const chordKeys = Object.keys(CHORDS);
-        const rand = Math.floor(Math.random() * Object.keys(CHORDS).length);
-        setChord(CHORDS[chordKeys[rand]]);
+        let selectedChords: Chord[] = [];
+        Object.entries(chordSets)
+            .filter(([k, v]) => !!v)
+            .forEach(([k, v]) => selectedChords.concat(Object.values(CHORDS[k])));
+        const rand = Math.floor(Math.random() * selectedChords.length);
+        let tempChord = selectedChords[rand];
+        if (nextClef === "bass") {
+            tempChord = tempChord.map(note =>
+                note.slice(0, note.length - 1) + (parseInt(note.slice(note.length - 1)) - 2)
+            );
+        }
+        setChord(tempChord);
         setNotes([]);
     }
 
@@ -326,6 +357,13 @@ export default function Home() {
                     <p>{(timerMs / 1000).toFixed(2)}s</p>
                     <p>Mean Time: {isNaN(meanTime) ? "---" : (meanTime / 1000).toFixed(2) + "s"}</p>
                 </div>
+                
+                {deviceId &&
+                    <div className="flex justify-center gap-4 text-xl">
+                        <p>{successes}/{total}</p>
+                        <p>{isNaN(successes / total) ? "0" : Math.round(100 * successes / total)}%</p>
+                    </div>
+                }
 
                 <p className="text-xl">
                     {text}
@@ -341,6 +379,8 @@ export default function Home() {
                 <OptionsModal
                     isOpen={optionsOpen}
                     setIsOpen={setOptionsOpen}
+                    chordSets={chordSets}
+                    setChordSets={setChordSets}
                     clefs={clefs}
                     setClefs={setClefs}
                     keys={keys}
