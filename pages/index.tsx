@@ -422,7 +422,7 @@ export default function Home() {
                     {text}
                 </p>
 
-                <div className="flex justify-center">
+                <div className="flex flex-col justify-center">
                     <MidiContextProvider value={{modalOpen, setModalOpen, loadState, setLoadState, deviceId, setDeviceId, devices, setDevices, notes, setNotes}}>
                         <PageContent />
                         <DeviceSelectForm />
