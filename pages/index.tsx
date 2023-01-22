@@ -31,6 +31,13 @@ export default function Home() {
     const [nextClef, setNextClef] = useState("treble");
     const [nextKey, setNextKey] = useState("C");
 
+    const newRandomClef = () => {
+        const chosenClefs = Object.entries(clefs)
+            .filter(([k, v]) => !!v)
+            .map(([k, v]) => k);
+        setNextClef(chosenClefs[Math.floor(Math.random() * chosenClefs.length)]);
+    }
+
     const newRandomChord = () => {
         let selectedChords: Chord[] = [];
         Object.entries(chordSets)
@@ -88,6 +95,10 @@ export default function Home() {
         })
     }, [])
 
+    useEffect(() => {
+        newRandomChord();
+    }, [nextClef]);
+
     // generate new chord after connecting MIDI device
     useEffect(() => {
         if (deviceId && !modalOpen) {
@@ -97,6 +108,56 @@ export default function Home() {
 
     const adjustNote = (note: string) => {
         switch (note) {
+            case "ab/2":
+            case "Ab2":
+                return "G#2";
+            case "bb/2":
+            case "Bb2":
+                return "A#2";
+            case "B#/2":
+            case "B#2":
+                return "C3";
+            case "db/2":
+            case "Db2":
+                return "C#2";
+            case "eb/2":
+            case "Eb2":
+                return "D#2";
+            case "fb/2":
+                return "E3";
+            case "e#/2":
+            case "E#2":
+                return "F2";
+            case "gb/2":
+            case "Gb2":
+                return "F#2";
+            case "cb/3":
+                return "B2";
+            case "ab/3":
+            case "Ab3":
+                return "G#3";
+            case "bb/3":
+            case "Bb3":
+                return "A#3";
+            case "B#/3":
+            case "B#3":
+                return "C4";
+            case "db/3":
+            case "Db3":
+                return "C#3";
+            case "eb/3":
+            case "Eb3":
+                return "D#3";
+            case "fb/3":
+                return "E4";
+            case "e#/3":
+            case "E#3":
+                return "F3";
+            case "gb/3":
+            case "Gb3":
+                return "F#3";
+            case "cb/4":
+                return "B3";
             case "ab/4":
             case "Ab4":
                 return "G#4";
@@ -152,6 +213,66 @@ export default function Home() {
         if (!chord) return str2;
         let str3 = "";
         switch (str2) {
+            case "a#/2":
+                str3 = "bb/2";
+                break;
+            case "b/2":
+                str3 = "cb/3";
+                break;
+            case "b#/2":
+                str3 = "c/3";
+                break;
+            case "c#/2":
+                str3 = "db/2";
+                break;
+            case "d#/2":
+                str3 = "eb/2";
+                break;
+            case "e/2":
+                str3 = "fb/2";
+                break;
+            case "e#/2":
+                str3 = "f/2";
+                break;
+            case "f/2":
+                str3 = "e#/2";
+                break;
+            case "f#/2":
+                str3 = "gb/2";
+                break;
+            case "g#/2":
+                str3 = "ab/2";
+                break;
+            case "a#/3":
+                str3 = "bb/3";
+                break;
+            case "b/3":
+                str3 = "cb/4";
+                break;
+            case "b#/3":
+                str3 = "c/4";
+                break;
+            case "c#/3":
+                str3 = "db/3";
+                break;
+            case "d#/3":
+                str3 = "eb/3";
+                break;
+            case "e/3":
+                str3 = "fb/3";
+                break;
+            case "e#/3":
+                str3 = "f/3";
+                break;
+            case "f/3":
+                str3 = "e#/3";
+                break;
+            case "f#/3":
+                str3 = "gb/3";
+                break;
+            case "g#/3":
+                str3 = "ab/3";
+                break;
             case "a#/4":
                 str3 = "bb/4";
                 break;
@@ -233,6 +354,7 @@ export default function Home() {
                 stopTimer();
                 setTimeout(() => {// 1s delay before continuing
                     newRandomKey();
+                    newRandomClef();
                     newRandomChord();
                     setText("");
                     setCanInput(true);
@@ -248,6 +370,7 @@ export default function Home() {
             stopTimer();
             setTimeout(() => {// 1s delay before continuing
                 newRandomKey();
+                newRandomClef();
                 newRandomChord();
                 setText("");
                 setCanInput(true);
@@ -257,7 +380,7 @@ export default function Home() {
     }, [canInput, chord, newRandomKey, notes, startTimer, stopTimer, successes, total]);
 
     return (
-        <div>
+        <>
             <Head>
                 <title>Sightreading Practice</title>
                 <meta name="description" content="Sightreading Practice"/>
@@ -269,69 +392,59 @@ export default function Home() {
                     Sightreading Practice
                 </h1>
 
-                {loadState !== LoadingState.SESSION_ENDED &&
-                    <>
-                        <Button
-                            onClick={() => setOptionsOpen(true)}
-                            text="Options"
-                            canSubmit
-                            className="mt-4"
+                {loadState !== LoadingState.SESSION_ENDED && <>
+                    <Button
+                        onClick={() => setOptionsOpen(true)}
+                        text="Options"
+                        canSubmit
+                        className="mt-4"
+                    />
+                    <Button text="End Session" onClick={() => setLoadState(LoadingState.SESSION_ENDED)} canSubmit={true}/>
+
+                    {chord &&
+                        <Score
+                            className="w-1/2 h-full"
+                            clef={nextClef}
+                            keySignature={nextKey}
+                            staves={notes.length === 0 ? [
+                                [{
+                                    keys: chord,
+                                    duration: "1",
+                                }],
+                            ] : [
+                                [{
+                                    keys: chord,
+                                    duration: "1",
+                                }],
+                                [{
+                                    keys: notes.map(checkFlats),
+                                    duration: "1",
+                                }],
+                            ]}
                         />
-                        <Button text="End Session" onClick={() => setLoadState(LoadingState.SESSION_ENDED)} canSubmit={true}/>
+                    }
 
-                        {chord &&
-                            <Score
-                                className="w-1/2 h-full"
-                                keySignature={nextKey}
-                                staves={notes.length === 0 ? [
-                                    [{
-                                        keys: chord,
-                                        duration: "1",
-                                    }],
-                                ] : [
-                                    [{
-                                        keys: chord,
-                                        duration: "1",
-                                    }],
-                                    [{
-                                        keys: notes.map(checkFlats),
-                                        duration: "1",
-                                    }],
-                                ]}
-                            />
-                        }
+                    <div className="flex flex-col justify-center">
+                        <MidiContextProvider value={{modalOpen, setModalOpen, loadState, setLoadState, deviceId, setDeviceId, devices, setDevices, notes, setNotes}}>
+                            <PageContent />
+                            <DeviceSelectionModal isOpen={modalOpen} setIsOpen={setModalOpen}/>
+                        </MidiContextProvider>
+                    </div>
 
-                        {deviceId &&
-                            <div className="flex justify-center gap-4 text-xl">
-                                <p>{successes}/{total}</p>
-                                <p>{isNaN(successes / total) ? "0" : Math.round(100 * successes / total)}%</p>
-                                <p>{(timerMs / 1000).toFixed(2)}s</p>
-                                <p>Mean Time: {isNaN(meanTime) ? "---" : (meanTime / 1000).toFixed(2) + "s"}</p>
-                            </div>
-                        }
-                    </>
-                }
-
-                <div className="flex flex-col justify-center">
-                    <MidiContextProvider value={{modalOpen, setModalOpen, loadState, setLoadState, deviceId, setDeviceId, devices, setDevices, notes, setNotes}}>
-                        <PageContent />
-                        <DeviceSelectionModal isOpen={modalOpen} setIsOpen={setModalOpen}/>
-                    </MidiContextProvider>
-                </div>
-
-                <OptionsModal
-                    isOpen={optionsOpen}
-                    setIsOpen={setOptionsOpen}
-                    chordSets={chordSets}
-                    setChordSets={setChordSets}
-                    clefs={clefs}
-                    setClefs={setClefs}
-                    keys={keys}
-                    setKeys={setKeys}
-                    noteTypes={noteTypes}
-                    setNoteTypes={setNoteTypes}
-                />
+                    <OptionsModal
+                        isOpen={optionsOpen}
+                        setIsOpen={setOptionsOpen}
+                        chordSets={chordSets}
+                        setChordSets={setChordSets}
+                        clefs={clefs}
+                        setClefs={setClefs}
+                        keys={keys}
+                        setKeys={setKeys}
+                        noteTypes={noteTypes}
+                        setNoteTypes={setNoteTypes}
+                    />
+                </>}
             </main>
-        </div>
+        </>
     )
 }
