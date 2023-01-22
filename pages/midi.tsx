@@ -55,7 +55,9 @@ function DeviceSelectForm() {
                     </label>
                 </div>
             ))}
-            <button type="submit">Select Device</button>
+            <button type="submit" className="rounded-md px-4 py-2 bg-gray-200">
+                Select Device
+            </button>
         </form>
     );
 }
