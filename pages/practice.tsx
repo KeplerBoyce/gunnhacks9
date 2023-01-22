@@ -1,6 +1,6 @@
 import Head from "next/head";
 import {Input, NoteMessageEvent, WebMidi} from "webmidi";
-import {createContext, MouseEventHandler, useContext, useEffect, useState} from "react";
+import {createContext, MouseEventHandler, startTransition, useContext, useEffect, useState} from "react";
 import CenteredModal from "../components/CenteredModal";
 import Button from "../components/Button";
 import Score from "../components/Score";
@@ -55,7 +55,7 @@ type AllProps = {
     loadState: LoadingState, setLoadState: LoadStateSetter,
     deviceId: string, setDeviceId: (x: string) => void
     devices: DeviceInput[], setDevices: DevicesSetter,
-    notes: Note[], setNotes: NoteSetter
+    notes: Note[], setNotes: NoteSetter,
 }
 
 const MidiContext = createContext<AllProps>({
@@ -63,7 +63,7 @@ const MidiContext = createContext<AllProps>({
     loadState: LoadingState.WAITING, setLoadState(): void {},
     deviceId: "", setDeviceId(): void {},
     devices: [], setDevices(): void {},
-    notes: [], setNotes: () => {}
+    notes: [], setNotes: () => {},
 });
 const MidiContextProvider = MidiContext.Provider;
 
@@ -335,7 +335,7 @@ export default function Midi() {
     }
 
     useEffect(() => {
-        if (!chord) return;
+        if (!chord || text) return;
         let adjustedChord = chord.map(note => adjustNote(note));
         notes.forEach(note => {
             if (!adjustedChord.includes(adjustNote(note))) {// incorrect
