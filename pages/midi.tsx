@@ -1,6 +1,6 @@
 import Head from "next/head";
-import {Input, WebMidi} from "webmidi";
-import {createContext, useContext, useState} from "react";
+import {Input, NoteMessageEvent, WebMidi} from "webmidi";
+import {createContext, useContext, useEffect, useState} from "react";
 
 type DeviceInput = Input;
 type Note = string;
@@ -23,15 +23,22 @@ const MidiContext = createContext<AllProps>({
     notes: [], setNotes: () => {}
 });
 const MidiContextProvider = MidiContext.Provider;
+
 function MidiContent() {
     const {devices, deviceId, notes, setNotes} = useContext(MidiContext);
     
-    const midi = WebMidi.getInputById(deviceId)
-    midi.channels[1].addListener("noteon", e => {
-        setNotes((prevState) => [
-            ...prevState, e.note.identifier + Math.floor(e.note.number / 12 - 1)
-        ]);
-    });
+    useEffect(() => {
+        const midi = WebMidi.getInputById(deviceId)
+        const callback = (e: NoteMessageEvent) => {
+            setNotes((prevState) => [
+                ...prevState, e.note.identifier + Math.floor(e.note.number / 12 - 1)
+            ]);
+        }
+
+        midi.channels[1].addListener("noteon", callback);
+        return () => midi.channels[1].removeListener("noteon", callback)
+    }, [])
+    
     return <div>
         <h2 className="text-center text-3xl font-bold">Devices</h2>
         <ol>
@@ -44,13 +51,17 @@ function MidiContent() {
 }
 
 function DeviceSelectForm() {
-    const {devices, setLoadState, setDeviceId} = useContext(MidiContext);
+    const {devices, setLoadState, deviceId, setDeviceId} = useContext(MidiContext);
     return (
         <form onSubmit={() => setLoadState(LoadingState.DEVICE_SELECTED)}>
             {devices.map(device => (
                 <div key={device.id}>
                     <label>
-                        <input type="radio" required onChange={() => setDeviceId(device.id)} />
+                        <input
+                            type="radio"
+                            checked={deviceId === device.id}
+                            onChange={() => setDeviceId(device.id)}
+                        />
                         {device.name}
                     </label>
                 </div>
@@ -90,10 +101,13 @@ export default function Midi() {
         } else setLoadState(LoadingState.NO_DEVICE);
     }
 
-    WebMidi
-        .enable()
-        .then(onEnabled)
-        .catch(err => alert(err));
+    useEffect(() => {
+        WebMidi
+            .enable()
+            .then(onEnabled)
+            .catch(err => alert(err));
+    }, [])
+    
     return (
         <div>
             <Head>
