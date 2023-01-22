@@ -35,7 +35,7 @@ function MidiContent() {
     return <div>
         <h2 className="text-center text-3xl font-bold">Devices</h2>
         <ol>
-            {devices.map(device => device.name)}
+            {devices.map(device => <li key={device.id}>{device.name}</li>)}
         </ol>
 
         <h2 className="text-center text-3xl font-bold">Notes</h2>
