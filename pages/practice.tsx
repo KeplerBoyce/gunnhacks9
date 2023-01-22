@@ -17,7 +17,7 @@ const CHORDS: {[name: string]: Chord} = {
     G: ["g/4", "b/4", "d/5"],
     Ab: ["ab/4", "c/5", "eb/5"],
     Bb: ["bb/4", "d/5", "f/5"],
-    Cb: ["cb/4", "eb/4", "gb/4"],
+    Cb: ["cb/5", "eb/5", "gb/5"],
     Db: ["db/4", "f/4", "ab/4"],
     Eb: ["eb/4", "g/4", "bb/4"],
     Gb: ["gb/4", "bb/4", "db/5"],
@@ -154,13 +154,9 @@ function PageContent() {
                     canSubmit
                     className="mt-4 text-xl"
                 />
-                <DeviceSelectForm/>
             </>
         case LoadingState.DEVICE_SELECTED:
-            return <>
-                <DeviceSelectForm/>
-                <MidiContent/>
-            </>
+            return <MidiContent />
     }
 }
 
@@ -185,6 +181,7 @@ export default function Midi() {
     const [chord, setChord] = useState<Chord>();
     const [successes, setSuccesses] = useState(0);
     const [total, setTotal] = useState(0);
+    const [text, setText] = useState("");
 
     const newRandomChord = () => {
         const chordKeys = Object.keys(CHORDS);
@@ -242,20 +239,89 @@ export default function Midi() {
         }
     }
 
+    const goofycringe = (note: string) => {
+        let str = note.slice(1).split("");
+        str.splice(note.slice(1).length - 1, 0, "/");
+        let str2 = note[0].toLowerCase() + str.join("");
+        if (!chord) return str2;
+        let str3 = "";
+        switch (str2) {
+            case "a#/4":
+                str3 = "bb/4";
+                break;
+            case "b/4":
+                str3 = "cb/5";
+                break;
+            case "b#/4":
+                str3 = "c/5";
+                break;
+            case "c#/4":
+                str3 = "db/4";
+                break;
+            case "d#/4":
+                str3 = "eb/4";
+                break;
+            case "e/4":
+                str3 = "fb/4";
+                break;
+            case "e#/4":
+                str3 = "f/4";
+                break;
+            case "f#/4":
+                str3 = "gb/4";
+                break;
+            case "g#/4":
+                str3 = "ab/4";
+                break;
+            case "a#/5":
+                str3 = "bb/5";
+                break;
+            case "b/5":
+                str3 = "cb/6";
+                break;
+            case "b#/5":
+                str3 = "c/6";
+                break;
+            case "c#/5":
+                str3 = "db/5";
+                break;
+            case "d#/5":
+                str3 = "eb/5";
+                break;
+            case "e/5":
+                str3 = "fb/5";
+                break;
+            case "e#/5":
+                str3 = "f/5";
+                break;
+        }
+        if (chord.includes(str3)) {
+            return str3;
+        }
+        return str2;
+    }
+
     useEffect(() => {
         if (!chord) return;
         let adjustedChord = chord.map(note => adjustNote(note));
         notes.forEach(note => {
-            if (!adjustedChord.includes(adjustNote(note))) {
-                console.log(adjustNote(note), adjustedChord)
+            if (!adjustedChord.includes(adjustNote(note))) {// incorrect
                 setTotal(total + 1);
-                newRandomChord();
+                setText("Incorrect...");
+                setTimeout(() => {// 1s delay before continuing
+                    newRandomChord();
+                    setText("");
+                }, 1000);
             }
         });
-        if (adjustedChord.every(note => notes.includes(adjustNote(note)))) {
+        if (adjustedChord.every(note => notes.includes(adjustNote(note)))) {// correct
             setSuccesses(successes + 1);
             setTotal(total + 1);
-            newRandomChord();
+            setText("Correct!");
+            setTimeout(() => {// 1s delay before continuing
+                newRandomChord();
+                setText("");
+            }, 1000);
         }
     }, [notes]);
     
@@ -267,34 +333,46 @@ export default function Midi() {
                 <link rel="icon" href="/favicon.ico"/>
             </Head>
 
-            <main className="container pt-4">
+            <main className="container pt-4 flex flex-col gap-2 items-center">
                 <h1 className="text-center text-5xl font-bold">
                     Sightreading Practice
                 </h1>
 
                 {chord &&
-                    <div className="flex justify-center">
-                        <Score
-                            className="w-1/2 h-full"
-                            keySignature="C"
-                            staves={[
-                                [{
-                                    keys: chord,
-                                    duration: "1",
-                                }],
-                            ]}
-                        />
-                    </div>
+                    <Score
+                        className="w-1/2 h-full"
+                        keySignature="C"
+                        staves={notes.length === 0 ? [
+                            [{
+                                keys: chord,
+                                duration: "1",
+                            }],
+                        ] : [
+                            [{
+                                keys: chord,
+                                duration: "1",
+                            }],
+                            [{
+                                keys: notes.map(goofycringe),
+                                duration: "1",
+                            }],
+                        ]}
+                    />
                 }
 
                 <div className="flex justify-center gap-4 text-xl">
                     <p>{successes}/{total}</p>
-                    <p>{isNaN(successes/total) ? "0%" : Math.round(100 * successes/total)}%</p>
+                    <p>{isNaN(successes/total) ? "0" : Math.round(100 * successes/total)}%</p>
                 </div>
+
+                <p className="text-xl">
+                    {text}
+                </p>
 
                 <div className="flex justify-center">
                     <MidiContextProvider value={{modalOpen, setModalOpen, loadState, setLoadState, deviceId, setDeviceId, devices, setDevices, notes, setNotes}}>
                         <PageContent />
+                        <DeviceSelectForm />
                     </MidiContextProvider>
                 </div>
             </main>

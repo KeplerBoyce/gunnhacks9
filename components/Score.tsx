@@ -19,7 +19,7 @@ export default function Score({
     const rendererRef = useRef<VexFlow.Flow.Renderer>();
 
     const [width, setWidth] = useState(600);
-    const [height, setHeight] = useState(300);
+    const [height, setHeight] = useState(250);
   
     useLayoutEffect(() => {
         if (container.current) {
@@ -41,7 +41,8 @@ export default function Score({
         context.setFont('Arial', 10).setBackgroundFillStyle('#eed')
         context.scale(scale, scale)
         const clefAndTimeWidth = (clef ? clefWidth : 0) + (timeSignature ? timeWidth : 0);
-        const staveWidth = (width - clefAndTimeWidth) / staves.length
+        // const staveWidth = (width - clefAndTimeWidth) / staves.length
+        const staveWidth = 150
 
         let currX = 0
         staves.forEach((notes, i) => {
