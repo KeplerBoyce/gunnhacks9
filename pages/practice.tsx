@@ -4,8 +4,6 @@ import Score from "../components/Score"
 
 export default function Home() {
 
-    const [file, setFile] = useState("test.xml");
-
     return (
         <>
             <Head>
@@ -21,9 +19,15 @@ export default function Home() {
 
                 <div className="flex justify-center">
                     <Score
-                        className="w- h-full"
+                        className="h-full"
+                        keySignature="Gm"
                         staves={[
-                            [['c4', 1]],
+                            [
+                                {
+                                    keys: ["c/4", "e/4", "g/4"],
+                                    duration: "1",
+                                },
+                            ],
                         ]}
                     />
                 </div>

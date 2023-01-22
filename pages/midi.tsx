@@ -128,12 +128,14 @@ export default function Midi() {
     const [devices, setDevices] = useState<DeviceInput[]>([]);
     const [notes, setNotes] = useState<Note[]>([]);
     const [deviceId, setDeviceId] = useState("");
+    const [modalOpen, setModalOpen] = useState(false);
 
     useEffect(() => {
         WebMidi
             .enable()
             .then(() => checkForInputs(setLoadState, setDevices))
             .catch(err => alert(err));
+        setModalOpen(true);
     }, [])
     
     return (

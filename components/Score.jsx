@@ -11,13 +11,14 @@ export default function Score({
     className = "",
     staves = [],
     clef = "treble",
+    keySignature = "",
     timeSignature = "",
     scale = 2,
 }) {
     const container = useRef();
     const rendererRef = useRef();
 
-    const [width, setWidth] = useState(300);
+    const [width, setWidth] = useState(600);
     const [height, setHeight] = useState(300);
   
     useLayoutEffect(() => {
@@ -48,6 +49,7 @@ export default function Score({
             if (i === 0) {
                 stave.setWidth(staveWidth + clefAndTimeWidth)
                 clef && stave.addClef(clef);
+                keySignature && stave.addKeySignature(keySignature);
                 timeSignature && stave.addTimeSignature(timeSignature);
             }
             currX += stave.getWidth()
