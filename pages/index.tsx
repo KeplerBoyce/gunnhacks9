@@ -79,15 +79,16 @@ export default function Home() {
         setNextKey(chosenKeys[Math.floor(Math.random() * chosenKeys.length)]);
     }
 
-    const [startTime, setStartTime] = useState(Date.now());
-
-    const [realStartTime, setRealStartTime] = useState(Date.now());
-
-    const [currentTime, setNowTime] = useState(Date.now());
-
-
-    const resetTimer = () => {
-        setStartTime(Date.now());
+    const TIMER_INTERVAL = 10;
+    const [timerMs, setTimerMs] = useState(0);
+    const [timer, setTimer] = useState<NodeJS.Timer>();
+    const [meanTime, setMeanTime] = useState(NaN);
+    const executeTimer = () => setTimerMs(prevState => prevState + TIMER_INTERVAL);
+    const startTimer = () => setTimer(setInterval(executeTimer, TIMER_INTERVAL));
+    const stopTimer = () => {
+        clearInterval(timer);
+        setTimer(undefined);
+        setMeanTime(total >= 1 ? timerMs / total : NaN);
     }
 
 
@@ -107,14 +108,6 @@ export default function Home() {
                 })
               })
         })
-    }, [])
-
-    useEffect(() => {
-        setRealStartTime(Date.now)
-        const id = setInterval(() => {
-            setNowTime(Date.now())
-        }, 10)
-        return () => clearInterval(id);
     }, [])
 
     // generate new chord after connecting MIDI device
@@ -259,11 +252,13 @@ export default function Home() {
                 setCanInput(false);
                 setTotal(total + 1);
                 setText("Incorrect...");
+                stopTimer();
                 setTimeout(() => {// 1s delay before continuing
                     newRandomKey();
                     newRandomChord();
                     setText("");
                     setCanInput(true);
+                    startTimer();
                 }, 1000);
             }
         });
@@ -272,14 +267,16 @@ export default function Home() {
             setSuccesses(successes + 1);
             setTotal(total + 1);
             setText("Correct!");
+            stopTimer();
             setTimeout(() => {// 1s delay before continuing
                 newRandomKey();
                 newRandomChord();
                 setText("");
                 setCanInput(true);
+                startTimer();
             }, 1000);
         }
-    }, [canInput, chord, newRandomKey, notes, successes, total]);
+    }, [canInput, chord, newRandomKey, notes, startTimer, stopTimer, successes, total]);
 
     return (
         <div>
@@ -324,10 +321,10 @@ export default function Home() {
                 }
 
                 <div className="flex justify-center gap-4 text-xl">
-                    <p>{((currentTime - startTime)/1000).toFixed(2)}s</p>
-                    <p>Mean Time: {((currentTime - realStartTime)/(1000 * (total + 1))).toFixed(2)}s</p>
                     <p>{successes}/{total}</p>
                     <p>{isNaN(successes / total) ? "0" : Math.round(100 * successes / total)}%</p>
+                    <p>{(timerMs / 1000).toFixed(2)}s</p>
+                    <p>Mean Time: {isNaN(meanTime) ? "---" : (meanTime / 1000).toFixed(2) + "s"}</p>
                 </div>
 
                 <p className="text-xl">
