@@ -8,7 +8,7 @@ import OptionsModal from "../components/OptionsModal";
 import PageContent from "../components/PageContent";
 import Score from "../components/Score";
 import {DeviceInput, LoadingState, MidiContextProvider, Note} from "../util/MidiContext";
-import {defaultChordSets, defaultClefs, defaultKeys, defaultNoteTypes, Chord, CHORDS} from "../util/types";
+import {Chord, CHORDS, defaultChordSets, defaultClefs, defaultKeys, defaultNoteTypes} from "../util/types";
 
 export default function Home() {
     const [loadState, setLoadState] = useState(LoadingState.WAITING);
@@ -269,47 +269,48 @@ export default function Home() {
                     Sightreading Practice
                 </h1>
 
-                <Button
-                    onClick={() => setOptionsOpen(true)}
-                    text="Options"
-                    canSubmit
-                    className="mt-4"
-                />
+                {loadState !== LoadingState.SESSION_ENDED &&
+                    <>
+                        <Button
+                            onClick={() => setOptionsOpen(true)}
+                            text="Options"
+                            canSubmit
+                            className="mt-4"
+                        />
+                        <Button text="End Session" onClick={() => setLoadState(LoadingState.SESSION_ENDED)} canSubmit={true}/>
 
-                {chord &&
-                    <Score
-                        className="w-1/2 h-full"
-                        keySignature={nextKey}
-                        staves={notes.length === 0 ? [
-                            [{
-                                keys: chord,
-                                duration: "1",
-                            }],
-                        ] : [
-                            [{
-                                keys: chord,
-                                duration: "1",
-                            }],
-                            [{
-                                keys: notes.map(checkFlats),
-                                duration: "1",
-                            }],
-                        ]}
-                    />
+                        {chord &&
+                            <Score
+                                className="w-1/2 h-full"
+                                keySignature={nextKey}
+                                staves={notes.length === 0 ? [
+                                    [{
+                                        keys: chord,
+                                        duration: "1",
+                                    }],
+                                ] : [
+                                    [{
+                                        keys: chord,
+                                        duration: "1",
+                                    }],
+                                    [{
+                                        keys: notes.map(checkFlats),
+                                        duration: "1",
+                                    }],
+                                ]}
+                            />
+                        }
+
+                        {deviceId &&
+                            <div className="flex justify-center gap-4 text-xl">
+                                <p>{successes}/{total}</p>
+                                <p>{isNaN(successes / total) ? "0" : Math.round(100 * successes / total)}%</p>
+                                <p>{(timerMs / 1000).toFixed(2)}s</p>
+                                <p>Mean Time: {isNaN(meanTime) ? "---" : (meanTime / 1000).toFixed(2) + "s"}</p>
+                            </div>
+                        }
+                    </>
                 }
-
-                {deviceId &&
-                    <div className="flex justify-center gap-4 text-xl">
-                        <p>{successes}/{total}</p>
-                        <p>{isNaN(successes / total) ? "0" : Math.round(100 * successes / total)}%</p>
-                        <p>{(timerMs / 1000).toFixed(2)}s</p>
-                        <p>Mean Time: {isNaN(meanTime) ? "---" : (meanTime / 1000).toFixed(2) + "s"}</p>
-                    </div>
-                }
-
-                <p className="text-xl">
-                    {text}
-                </p>
 
                 <div className="flex flex-col justify-center">
                     <MidiContextProvider value={{modalOpen, setModalOpen, loadState, setLoadState, deviceId, setDeviceId, devices, setDevices, notes, setNotes}}>
