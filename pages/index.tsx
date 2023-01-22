@@ -5,9 +5,8 @@ import Button from "../components/Button";
 import Score from "../components/Score";
 import OptionsModal from "../components/OptionsModal";
 import {defaultClefs, defaultKeys, defaultNoteTypes} from "../util/types";
-import Soundfont from "soundfont-player"
-import {clearInterval} from "timers";
-import DeviceSelectionModal from "../components/DeviceSelectionModal"
+import Soundfont from "soundfont-player";
+import DeviceSelectionModal from "../components/DeviceSelectionModal";
 
 type Chord = string[];
 
