@@ -8,63 +8,7 @@ import OptionsModal from "../components/OptionsModal";
 import PageContent from "../components/PageContent";
 import Score from "../components/Score";
 import {DeviceInput, LoadingState, MidiContextProvider, Note} from "../util/MidiContext";
-import {defaultChordSets, defaultClefs, defaultKeys, defaultNoteTypes} from "../util/types";
-
-type Chord = string[];
-
-const CHORDS: { [q: string]: { [x: string]: Chord } } = {
-    major: {
-        A: ["a/4", "c#/5", "e/5"],
-        B: ["b/4", "d#/5", "f#/5"],
-        C: ["c/4", "e/4", "g/4"],
-        D: ["d/4", "f#/4", "a/4"],
-        E: ["e/4", "g#/4", "b/4"],
-        F: ["f/4", "a/4", "c/5"],
-        G: ["g/4", "b/4", "d/5"],
-        Ab: ["ab/4", "c/5", "eb/5"],
-        Bb: ["bb/4", "d/5", "f/5"],
-        Cb: ["cb/5", "eb/5", "gb/5"],
-        Db: ["db/4", "f/4", "ab/4"],
-        Eb: ["eb/4", "g/4", "bb/4"],
-        Gb: ["gb/4", "bb/4", "db/5"],
-        Cs: ["c#/4", "e#/4", "g#/4"],
-        Fs: ["f#/4", "a#/4", "c#/5"],
-    },
-    minor: {
-        a: ["a/4", "c/5", "e/5"],
-        b: ["b/4", "d/5", "f#/5"],
-        c: ["c/4", "eb/4", "g/4"],
-        d: ["d/4", "f/4", "a/4"],
-        e: ["e/4", "g/4", "b/4"],
-        f: ["f/4", "ab/4", "c/5"],
-        g: ["g/4", "bb/4", "d/5"],
-        ab: ["ab/4", "cb/5", "eb/5"],
-        bb: ["bb/4", "db/5", "f/5"],
-        eb: ["eb/4", "gb/4", "bb/4"],
-        as: ["a#/4", "c#/5", "e#/5"],
-        cs: ["c#/4", "e/4", "g#/4"],
-        ds: ["d#/4", "f#/4", "a#/4"],
-        fs: ["f#/4", "a/4", "c#/5"],
-        gs: ["g#/4", "b/4", "d#/5"],
-    },
-    majorSeventh: {
-        A: ["a/4", "c#/5", "e/5", "g#/5"],
-        B: ["b/4", "d#/5", "f#/5", "a#/5"],
-        C: ["c/4", "e/4", "g/4", "b/4"],
-        D: ["d/4", "f#/4", "a/4", "c#/5"],
-        E: ["e/4", "g#/4", "b/4", "d#/5"],
-        F: ["f/4", "a/4", "c/5", "e/5"],
-        G: ["g/4", "b/4", "d/5", "f/5"],
-        Ab: ["ab/4", "c/5", "eb/5", "g/5"],
-        Bb: ["bb/4", "d/5", "f/5", "a/5"],
-        Cb: ["cb/5", "eb/5", "gb/5", "bb/5"],
-        Db: ["db/4", "f/4", "ab/4", "c/5"],
-        Eb: ["eb/4", "g/4", "bb/4", "d/5"],
-        Gb: ["gb/4", "bb/4", "db/5", "f/5"],
-        Cs: ["c#/4", "e#/4", "g#/4", "b#/4"],
-        Fs: ["f#/4", "a#/4", "c#/5", "e#/5"],
-    },
-}
+import {defaultChordSets, defaultClefs, defaultKeys, defaultNoteTypes, Chord, CHORDS} from "../util/types";
 
 export default function Home() {
     const [loadState, setLoadState] = useState(LoadingState.WAITING);
@@ -91,7 +35,11 @@ export default function Home() {
         let selectedChords: Chord[] = [];
         Object.entries(chordSets)
             .filter(([k, v]) => !!v)
-            .forEach(([k, v]) => selectedChords.concat(Object.values(CHORDS[k])));
+            .forEach(([k, v]) => {
+                Object.values(CHORDS[k]).forEach((c) => {
+                    selectedChords.push(c);
+                });
+            });
         const rand = Math.floor(Math.random() * selectedChords.length);
         let tempChord = selectedChords[rand];
         if (nextClef === "bass") {
@@ -122,7 +70,6 @@ export default function Home() {
         setMeanTime(total >= 1 ? timerMs / total : NaN);
     }
 
-
     useEffect(() => {
         WebMidi
             .enable()
@@ -132,12 +79,12 @@ export default function Home() {
             })
             .catch(err => alert(err));
         newRandomChord();
-        Soundfont.instrument(new AudioContext(), 'acoustic_grand_piano').then(function (piano) {
+        Soundfont.instrument(new AudioContext(), 'acoustic_grand_piano', {gain: 500}).then(function (piano) {
             window.navigator.requestMIDIAccess().then(function (midiAccess) {
                 midiAccess.inputs.forEach(function (midiInput) {
-                  piano.listenToMidi(midiInput)
+                    piano.listenToMidi(midiInput)
                 })
-              })
+            })
         })
     }, [])
 
@@ -357,7 +304,7 @@ export default function Home() {
                     <p>{(timerMs / 1000).toFixed(2)}s</p>
                     <p>Mean Time: {isNaN(meanTime) ? "---" : (meanTime / 1000).toFixed(2) + "s"}</p>
                 </div>
-                
+
                 {deviceId &&
                     <div className="flex justify-center gap-4 text-xl">
                         <p>{successes}/{total}</p>
