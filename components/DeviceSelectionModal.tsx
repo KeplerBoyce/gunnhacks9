@@ -1,8 +1,8 @@
 import Button from "./Button";
 import CenteredModal from "./CenteredModal";
 import {useContext} from "react";
-import {LoadingState, MidiContext} from "../pages"
 import {WebMidi} from "webmidi";
+import {LoadingState, MidiContext} from "../util/MidiContext";
 
 export default function DeviceSelectionModal(props: {isOpen: boolean, setIsOpen: (x: boolean) => void}) {
     const {devices, setDevices, setDeviceId, setLoadState, setModalOpen} = useContext(MidiContext)
