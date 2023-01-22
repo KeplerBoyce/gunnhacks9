@@ -216,7 +216,7 @@ export default function OptionsModal(props: {
                     />
                 </ToggleButtonGroup>
 
-                <Button text="Save and Close" onClick={() => setIsOpen(false)} canSubmit={false}/>
+                <Button text="Save and Close" onClick={() => setIsOpen(false)} canSubmit={true}/>
             </div>
         </CenteredModal>
     )
