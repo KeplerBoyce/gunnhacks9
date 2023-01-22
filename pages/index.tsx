@@ -71,22 +71,27 @@ export const MidiContext = createContext<AllProps>({
 const MidiContextProvider = MidiContext.Provider;
 
 function MidiContent() {
-    const {deviceId, notes, setNotes} = useContext(MidiContext);
+    const {setLoadState, deviceId, setDeviceId, notes, setNotes} = useContext(MidiContext);
 
     useEffect(() => {
-        const midi = WebMidi.getInputById(deviceId)
-        const callback = (e: NoteMessageEvent) => {
-            if (!notes.includes(e.note.identifier)) {
-                setNotes((prevState) => [
-                    ...prevState, e.note.identifier
-                ]);
+        const midi = WebMidi.getInputById(deviceId);
+        if (typeof midi === "undefined") {  // in case MIDI device suddenly disconnects
+            setDeviceId("");
+            setLoadState(LoadingState.SELECTING_DEVICE);
+        } else {
+            const callback = (e: NoteMessageEvent) => {
+                if (!notes.includes(e.note.identifier)) {
+                    setNotes((prevState) => [
+                        ...prevState, e.note.identifier
+                    ]);
+                }
+            }
+            midi.channels.forEach(channel => channel.addListener("noteon", callback));
+            return () => {
+                midi.channels.forEach(channel => channel.removeListener("noteon", callback));
             }
         }
-        midi.channels.forEach(channel => channel.addListener("noteon", callback));
-        return () => {
-            midi.channels.forEach(channel => channel.removeListener("noteon", callback));
-        }
-    }, [deviceId, notes, setNotes])
+    }, [deviceId, notes, setDeviceId, setLoadState, setNotes])
 
     return <div>
         {/* <h2 className="text-center text-3xl font-bold">Notes</h2>
