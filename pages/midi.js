@@ -5,6 +5,7 @@ import easymidi from "easymidi";
 
 export default function Midi() {
   var inputs = easymidi.getInputs();
+
   return (
     <div>
       <Head>
@@ -15,7 +16,8 @@ export default function Midi() {
 
       <main className="container pt-4">
         <h1 className="text-center text-5xl font-bold text-red-500">
-          {inputs}
+          {/* {inputs} */}
+          MIDI
         </h1>
       </main>
     </div>
