@@ -39,6 +39,7 @@ export default function Midi() {
 
       setDevices(WebMidi.inputs.map((device, index) => <li key={index}>{index}: {device.name}</li>));
 
+      const midi = WebMidi.inputs[0];
       midi.channels[1].addListener("noteon", e => {
         setNotes(prevState => [
           ...prevState, <li key="a">{e.note.identifier + Math.floor(e.note.number / 12 - 1)}</li>
@@ -46,8 +47,6 @@ export default function Midi() {
       });
     } else setLoadState(LoadingState.NO_DEVICE);
   }
-
-  const midi = WebMidi.inputs[0];
 
   WebMidi
     .enable()
