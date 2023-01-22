@@ -5,14 +5,15 @@ import {Dialog, Transition} from '@headlessui/react';
 // https://github.com/GunnWATT/watt/blob/main/client/src/components/layout/CenteredModal.tsx
 export type CenteredModalProps = {
     isOpen: boolean, setIsOpen: (isOpen: boolean) => void,
+    clickToClose: boolean,
     children: ReactNode
 }
 export default function CenteredModal(props: CenteredModalProps) {
-    const {isOpen, setIsOpen, children} = props;
+    const {isOpen, setIsOpen, clickToClose, children} = props;
 
     return (
         <Transition appear show={isOpen} as={Fragment}>
-            <Dialog open={true} onClose={() => setIsOpen(false)} className="fixed z-10 inset-0 flex items-center justify-center">
+            <Dialog open={true} onClose={clickToClose ? () => setIsOpen(false) : () => {}} className="fixed z-10 inset-0 flex items-center justify-center">
                 <Transition.Child
                     as={Fragment}
                     enter="ease-out duration-300"

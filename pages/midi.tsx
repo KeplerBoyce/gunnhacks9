@@ -1,6 +1,8 @@
 import Head from "next/head";
 import {Input, NoteMessageEvent, WebMidi} from "webmidi";
 import {createContext, MouseEventHandler, useContext, useEffect, useState} from "react";
+import CenteredModal from "../components/CenteredModal";
+import Button from "../components/Button";
 
 type DeviceInput = Input;
 type Note = string;
@@ -13,6 +15,7 @@ enum LoadingState {
 }
 
 type AllProps = {
+    modalOpen: boolean, setModalOpen: (x: boolean) => void,
     loadState: LoadingState, setLoadState: LoadStateSetter,
     deviceId: string, setDeviceId: (x: string) => void
     devices: DeviceInput[], setDevices: DevicesSetter,
@@ -20,27 +23,13 @@ type AllProps = {
 }
 
 const MidiContext = createContext<AllProps>({
+    modalOpen: true, setModalOpen: () => {},
     loadState: LoadingState.WAITING, setLoadState(): void {},
     deviceId: "", setDeviceId(): void {},
     devices: [], setDevices(): void {},
     notes: [], setNotes: () => {}
 });
 const MidiContextProvider = MidiContext.Provider;
-
-function GenericButton(props: {onClick: MouseEventHandler<HTMLButtonElement>, children: any, type?: "button" | "submit"}) {
-    return (
-        <button className="rounded-sm px-4 py-2 bg-gray-200 hover:bg-gray-300 hover:cursor-pointer m-1" {...props} />
-    )
-}
-
-function ScanAgainButton() {
-    const {setLoadState, setDevices} = useContext(MidiContext);
-    return (  // set type="button" so it doesn't submit any forms it's in
-        <GenericButton onClick={() => checkForInputs(setLoadState, setDevices)} type="button">
-            Scan again
-        </GenericButton>
-    )
-}
 
 function MidiContent() {
     const {devices, deviceId, notes, setNotes} = useContext(MidiContext);
@@ -59,42 +48,48 @@ function MidiContent() {
     }, [deviceId, setNotes])
     
     return <div>
-        <h2 className="text-center text-3xl font-bold">Devices</h2>
-        <ol>
-            {devices.map(device => <li key={device.id}>{device.name}</li>)}
-        </ol>
-
         <h2 className="text-center text-3xl font-bold">Notes</h2>
         <ul>{notes.map((note, idx) => <li key={idx}>{note}</li>)}</ul>
     </div>
 }
 
 function DeviceSelectForm() {
-    const {devices, setLoadState, deviceId, setDeviceId} = useContext(MidiContext);
+    const {modalOpen, setModalOpen, devices, setLoadState, setDevices, deviceId, setDeviceId} = useContext(MidiContext);
     console.log("Devices:")
     console.log(devices)
+
+    const handleSubmit = () => {
+        setLoadState(LoadingState.DEVICE_SELECTED);
+        setModalOpen(false);
+    }
+
     return (
-        <form onSubmit={() => setLoadState(LoadingState.DEVICE_SELECTED)}>
-            {devices.map(device => (
-                <div key={device.id}>
-                    <label>
-                        <input
-                            type="radio"
-                            checked={deviceId === device.id}
-                            onChange={() => setDeviceId(device.id)}
-                        />
-                        {device.name}
-                    </label>
+        <CenteredModal isOpen={modalOpen} setIsOpen={setModalOpen} clickToClose={false}>
+            <div className="flex flex-col gap-4 bg-white p-8 rounded-lg">
+                <h1 className="text-xl font-bold">
+                    Select a MIDI device
+                </h1>
+                <div className="flex flex-col">
+                    {devices.map(device => (
+                        <button
+                            onClick={() => setDeviceId(device.id)}
+                            key={device.id}
+                            className={"duration-200 px-2 py-1 rounded-lg cursor-pointer "
+                                + (deviceId === device.id ? "bg-blue-300 hover:bg-blue-400" : "hover:bg-gray-200")}
+                        >
+                            {device.name}
+                        </button>
+                    ))}
                 </div>
-            ))}
-            <GenericButton onClick={() => {}}>Select Device</GenericButton>
-            <ScanAgainButton/>
-        </form>
+                <Button onClick={() => handleSubmit()} text="Select" canSubmit={!!deviceId} />
+                <Button onClick={() => checkForInputs(setLoadState, setDevices)} text="Rescan" canSubmit />
+            </div>
+        </CenteredModal>
     );
 }
 
 function PageContent() {
-    const {loadState} = useContext(MidiContext);
+    const {setModalOpen, loadState, setLoadState, setDevices} = useContext(MidiContext);
     switch (loadState) {
         case LoadingState.WAITING:
             return <p>Loading...</p>
@@ -102,13 +97,17 @@ function PageContent() {
             return (
                 <div>
                     <p>No device found.</p>
-                    <ScanAgainButton/>
+                    <Button onClick={() => checkForInputs(setLoadState, setDevices)} text="Rescan" canSubmit />
                 </div>
             )
         case LoadingState.SELECTING_DEVICE:
+            setModalOpen(true);
             return <DeviceSelectForm/>
         case LoadingState.DEVICE_SELECTED:
-            return <MidiContent/>;
+            return <>
+                <DeviceSelectForm/>
+                <MidiContent/>
+            </>;
     }
 }
 
@@ -135,7 +134,6 @@ export default function Midi() {
             .enable()
             .then(() => checkForInputs(setLoadState, setDevices))
             .catch(err => alert(err));
-        setModalOpen(true);
     }, [])
     
     return (
@@ -150,7 +148,7 @@ export default function Midi() {
                 <h1 className="text-center text-5xl font-bold text-red-500">
                     MIDI
                 </h1>
-                <MidiContextProvider value={{loadState, setLoadState, deviceId, setDeviceId, devices, setDevices, notes, setNotes}}>
+                <MidiContextProvider value={{modalOpen, setModalOpen, loadState, setLoadState, deviceId, setDeviceId, devices, setDevices, notes, setNotes}}>
                     <PageContent />
                 </MidiContextProvider>
             </main>
