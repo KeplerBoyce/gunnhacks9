@@ -215,8 +215,9 @@ export default function Midi() {
             case "bb/4":
             case "Bb4":
                 return "A#4";
-            case "cb/4":
-                return "B3";
+            case "B#/4":
+            case "B#4":
+                return "C5";
             case "db/4":
             case "Db4":
                 return "C#4";
@@ -225,17 +226,32 @@ export default function Midi() {
                 return "D#4";
             case "fb/4":
                 return "E4";
+            case "e#/4":
+            case "E#4":
+                return "F4";
             case "gb/4":
             case "Gb4":
                 return "F#4";
             case "cb/5":
                 return "B4";
+            case "B#/5":
+            case "B#5":
+                return "C6";
             case "db/5":
             case "Db5":
                 return "C#5";
             case "eb/5":
             case "Eb5":
                 return "D#5";
+            case "fb/5":
+            case "Fb5":
+                return "E5";
+            case "e#/5":
+            case "E#5":
+                return "F5";
+            case "gb/5":
+            case "Gb5":
+                return "F#5";
             default:
                 return note[0].toUpperCase() + note.slice(1).split("/").join("");
         }
@@ -269,6 +285,9 @@ export default function Midi() {
             case "e#/4":
                 str3 = "f/4";
                 break;
+            case "f/4":
+                str3 = "e#/4";
+                break;
             case "f#/4":
                 str3 = "gb/4";
                 break;
@@ -284,6 +303,9 @@ export default function Midi() {
             case "b#/5":
                 str3 = "c/6";
                 break;
+            case "c/5":
+                str3 = "b#/5";
+                break;
             case "c#/5":
                 str3 = "db/5";
                 break;
@@ -296,8 +318,14 @@ export default function Midi() {
             case "e#/5":
                 str3 = "f/5";
                 break;
+            case "f/5":
+                str3 = "e#/5";
+                break;
             case "f#/5":
                 str3 = "gb/5";
+                break;
+            case "c/6":
+                str3 = "b#/5";
                 break;
         }
         if (chord.includes(str3)) {
