@@ -83,7 +83,7 @@ function MidiContent() {
         return () => {
             midi.channels.forEach(channel => channel.removeListener("noteon", callback));
         }
-    }, [deviceId, setNotes])
+    }, [deviceId, notes])
     
     return <div>
         {/* <h2 className="text-center text-3xl font-bold">Notes</h2>
@@ -257,7 +257,7 @@ export default function Midi() {
         }
     }
 
-    const goofycringe = (note: string) => {
+    const checkFlats = (note: string) => {
         let str = note.slice(1).split("");
         str.splice(note.slice(1).length - 1, 0, "/");
         let str2 = note[0].toLowerCase() + str.join("");
@@ -386,7 +386,7 @@ export default function Midi() {
                                 duration: "1",
                             }],
                             [{
-                                keys: notes.map(goofycringe),
+                                keys: notes.map(checkFlats),
                                 duration: "1",
                             }],
                         ]}
