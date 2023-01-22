@@ -1,13 +1,14 @@
 import Head from "next/head";
-import {Input, NoteMessageEvent, WebMidi} from "webmidi";
-import {createContext, useContext, useEffect, useState} from "react";
-import Button from "../components/Button";
-import Score from "../components/Score";
-import OptionsModal from "../components/OptionsModal";
-import {defaultClefs, defaultKeys, defaultNoteTypes} from "../util/types";
+import {useEffect, useState} from "react";
+import {WebMidi} from "webmidi";
 import Soundfont from "soundfont-player";
+import Button from "../components/Button";
 import DeviceSelectionModal from "../components/DeviceSelectionModal";
-import { CLIENT_STATIC_FILES_RUNTIME } from "next/dist/shared/lib/constants";
+import OptionsModal from "../components/OptionsModal";
+import PageContent from "../components/PageContent";
+import Score from "../components/Score";
+import {DeviceInput, LoadingState, MidiContextProvider, Note} from "../util/MidiContext";
+import {defaultClefs, defaultKeys, defaultNoteTypes} from "../util/types";
 
 type Chord = string[];
 
@@ -42,82 +43,6 @@ const CHORDS: { [name: string]: Chord } = {
     ds: ["d#/4", "f#/4", "a#/4"],
     fs: ["f#/4", "a/4", "c#/5"],
     gs: ["g#/4", "b/4", "d#/5"],
-}
-
-type DeviceInput = Input;
-type Note = string;
-type LoadStateSetter = (x: LoadingState) => void;
-type DevicesSetter = (x: DeviceInput[]) => void;
-type NoteSetter = (arg: Note[] | ((x: Note[]) => Note[])) => void;
-
-export enum LoadingState {
-    WAITING, SELECTING_DEVICE, DEVICE_SELECTED
-}
-
-type AllProps = {
-    modalOpen: boolean, setModalOpen: (x: boolean) => void,
-    loadState: LoadingState, setLoadState: LoadStateSetter,
-    deviceId: string, setDeviceId: (x: string) => void
-    devices: DeviceInput[], setDevices: DevicesSetter,
-    notes: Note[], setNotes: NoteSetter,
-}
-
-export const MidiContext = createContext<AllProps>({
-    modalOpen: true, setModalOpen: () => {},
-    loadState: LoadingState.WAITING, setLoadState(): void {},
-    deviceId: "", setDeviceId(): void {},
-    devices: [], setDevices(): void {},
-    notes: [], setNotes: () => {},
-});
-const MidiContextProvider = MidiContext.Provider;
-
-function MidiContent() {
-    const {setLoadState, deviceId, setDeviceId, notes, setNotes} = useContext(MidiContext);
-
-    useEffect(() => {
-        const midi = WebMidi.getInputById(deviceId);
-        if (typeof midi === "undefined") {  // in case MIDI device suddenly disconnects
-            setDeviceId("");
-            setLoadState(LoadingState.SELECTING_DEVICE);
-        } else {
-            const callback = (e: NoteMessageEvent) => {
-                if (!notes.includes(e.note.identifier)) {
-                    setNotes((prevState) => [
-                        ...prevState, e.note.identifier
-                    ]);
-                }
-            }
-            midi.channels.forEach(channel => channel.addListener("noteon", callback));
-            return () => {
-                midi.channels.forEach(channel => channel.removeListener("noteon", callback));
-            }
-        }
-    }, [deviceId, notes, setDeviceId, setLoadState, setNotes])
-
-    return <div>
-        {/* <h2 className="text-center text-3xl font-bold">Notes</h2>
-        <ul>{notes.map((note, idx) => <li key={idx}>{note}</li>)}</ul> */}
-    </div>
-}
-
-function PageContent() {
-    const {setModalOpen, loadState, setLoadState, setDevices} = useContext(MidiContext);
-    switch (loadState) {
-        case LoadingState.WAITING:
-            return <p>Loading...</p>
-        case LoadingState.SELECTING_DEVICE:
-            return <>
-                <p className="text-center">No device selected</p>
-                <Button
-                    onClick={() => setModalOpen(true)}
-                    text="Select MIDI device"
-                    canSubmit
-                    className="mt-4 text-xl"
-                />
-            </>
-        case LoadingState.DEVICE_SELECTED:
-            return <MidiContent/>
-    }
 }
 
 export default function Home() {
