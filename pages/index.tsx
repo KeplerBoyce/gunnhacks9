@@ -1,138 +1,14 @@
 import Head from "next/head";
-import {Input, NoteMessageEvent, WebMidi} from "webmidi";
-import {createContext, useContext, useEffect, useState} from "react";
-import Button from "../components/Button";
-import Score from "../components/Score";
-import OptionsModal from "../components/OptionsModal";
-import {defaultClefs, defaultKeys, defaultNoteTypes} from "../util/types";
+import {useEffect, useState} from "react";
+import {WebMidi} from "webmidi";
 import Soundfont from "soundfont-player";
+import Button from "../components/Button";
 import DeviceSelectionModal from "../components/DeviceSelectionModal";
-import { CLIENT_STATIC_FILES_RUNTIME } from "next/dist/shared/lib/constants";
-
-type Chord = string[];
-
-const CHORDS: { [name: string]: Chord } = {
-    A: ["a/4", "c/5", "e/5"],
-    B: ["b/4", "d#/5", "f#/5"],
-    C: ["c/4", "e/4", "g/4"],
-    D: ["d/4", "f#/4", "a/4"],
-    E: ["e/4", "g#/4", "b/4"],
-    F: ["f/4", "a/4", "c/5"],
-    G: ["g/4", "b/4", "d/5"],
-    Ab: ["ab/4", "c/5", "eb/5"],
-    Bb: ["bb/4", "d/5", "f/5"],
-    Cb: ["cb/5", "eb/5", "gb/5"],
-    Db: ["db/4", "f/4", "ab/4"],
-    Eb: ["eb/4", "g/4", "bb/4"],
-    Gb: ["gb/4", "bb/4", "db/5"],
-    Cs: ["c#/4", "e#/4", "g#/4"],
-    Fs: ["f#/4", "a#/4", "c#/5"],
-    a: ["a/4", "c/5", "e/5"],
-    b: ["b/4", "d/5", "f#/5"],
-    c: ["c/4", "eb/4", "g/4"],
-    d: ["d/4", "f/4", "a/4"],
-    e: ["e/4", "g/4", "b/4"],
-    f: ["f/4", "ab/4", "c/5"],
-    g: ["g/4", "bb/4", "d/5"],
-    ab: ["ab/4", "cb/5", "eb/5"],
-    bb: ["bb/4", "db/5", "f/5"],
-    eb: ["eb/4", "gb/4", "bb/4"],
-    as: ["a#/4", "c#/5", "e#/5"],
-    cs: ["c#/4", "e/4", "g#/4"],
-    ds: ["d#/4", "f#/4", "a#/4"],
-    fs: ["f#/4", "a/4", "c#/5"],
-    gs: ["g#/4", "b/4", "d#/5"],
-}
-
-type DeviceInput = Input;
-type Note = string;
-type LoadStateSetter = (x: LoadingState) => void;
-type DevicesSetter = (x: DeviceInput[]) => void;
-type NoteSetter = (arg: Note[] | ((x: Note[]) => Note[])) => void;
-
-export enum LoadingState {
-    WAITING, SELECTING_DEVICE, DEVICE_SELECTED
-}
-
-type AllProps = {
-    modalOpen: boolean, setModalOpen: (x: boolean) => void,
-    loadState: LoadingState, setLoadState: LoadStateSetter,
-    deviceId: string, setDeviceId: (x: string) => void
-    devices: DeviceInput[], setDevices: DevicesSetter,
-    notes: Note[], setNotes: NoteSetter,
-}
-
-export const MidiContext = createContext<AllProps>({
-    modalOpen: true, setModalOpen: () => {},
-    loadState: LoadingState.WAITING, setLoadState(): void {},
-    deviceId: "", setDeviceId(): void {},
-    devices: [], setDevices(): void {},
-    notes: [], setNotes: () => {},
-});
-const MidiContextProvider = MidiContext.Provider;
-
-function MidiContent() {
-    const {setLoadState, deviceId, setDeviceId, notes, setNotes} = useContext(MidiContext);
-
-    useEffect(() => {
-        const midi = WebMidi.getInputById(deviceId);
-        if (typeof midi === "undefined") {  // in case MIDI device suddenly disconnects
-            setDeviceId("");
-            setLoadState(LoadingState.SELECTING_DEVICE);
-        } else {
-            const callback = (e: NoteMessageEvent) => {
-                if (!notes.includes(e.note.identifier)) {
-                    setNotes((prevState) => [
-                        ...prevState, e.note.identifier
-                    ]);
-                }
-            }
-            midi.channels.forEach(channel => channel.addListener("noteon", callback));
-            return () => {
-                midi.channels.forEach(channel => channel.removeListener("noteon", callback));
-            }
-        }
-    }, [deviceId, notes, setDeviceId, setLoadState, setNotes])
-
-    return <div>
-        {/* <h2 className="text-center text-3xl font-bold">Notes</h2>
-        <ul>{notes.map((note, idx) => <li key={idx}>{note}</li>)}</ul> */}
-    </div>
-}
-
-function DeviceSelectForm() {
-    const {modalOpen, setModalOpen, devices, setLoadState, setDevices, deviceId, setDeviceId} = useContext(MidiContext);
-    // console.log("Devices:")
-    // console.log(devices)
-
-    const handleSubmit = (submittedDeviceId: string) => {
-        setDeviceId(submittedDeviceId);
-        setLoadState(LoadingState.DEVICE_SELECTED);
-        setModalOpen(false);
-    }
-
-    return <DeviceSelectionModal isOpen={modalOpen} setIsOpen={setModalOpen}/>;
-}
-
-function PageContent() {
-    const {setModalOpen, loadState, setLoadState, setDevices} = useContext(MidiContext);
-    switch (loadState) {
-        case LoadingState.WAITING:
-            return <p>Loading...</p>
-        case LoadingState.SELECTING_DEVICE:
-            return <>
-                <p className="text-center">No device selected</p>
-                <Button
-                    onClick={() => setModalOpen(true)}
-                    text="Select MIDI device"
-                    canSubmit
-                    className="mt-4 text-xl"
-                />
-            </>
-        case LoadingState.DEVICE_SELECTED:
-            return <MidiContent/>
-    }
-}
+import OptionsModal from "../components/OptionsModal";
+import PageContent from "../components/PageContent";
+import Score from "../components/Score";
+import {DeviceInput, LoadingState, MidiContextProvider, Note} from "../util/MidiContext";
+import {defaultChordSets, defaultClefs, defaultKeys, defaultNoteTypes, Chord, CHORDS} from "../util/types";
 
 export default function Home() {
     const [loadState, setLoadState] = useState(LoadingState.WAITING);
@@ -148,6 +24,7 @@ export default function Home() {
     const [text, setText] = useState("");
     const [canInput, setCanInput] = useState(true);
 
+    const [chordSets, setChordSets] = useState(defaultChordSets);
     const [clefs, setClefs] = useState(defaultClefs);
     const [keys, setKeys] = useState(defaultKeys);
     const [noteTypes, setNoteTypes] = useState(defaultNoteTypes);
@@ -155,9 +32,22 @@ export default function Home() {
     const [nextKey, setNextKey] = useState("C");
 
     const newRandomChord = () => {
-        const chordKeys = Object.keys(CHORDS);
-        const rand = Math.floor(Math.random() * Object.keys(CHORDS).length);
-        setChord(CHORDS[chordKeys[rand]]);
+        let selectedChords: Chord[] = [];
+        Object.entries(chordSets)
+            .filter(([k, v]) => !!v)
+            .forEach(([k, v]) => {
+                Object.values(CHORDS[k]).forEach((c) => {
+                    selectedChords.push(c);
+                });
+            });
+        const rand = Math.floor(Math.random() * selectedChords.length);
+        let tempChord = selectedChords[rand];
+        if (nextClef === "bass") {
+            tempChord = tempChord.map(note =>
+                note.slice(0, note.length - 1) + (parseInt(note.slice(note.length - 1)) - 2)
+            );
+        }
+        setChord(tempChord);
         setNotes([]);
     }
 
@@ -168,17 +58,17 @@ export default function Home() {
         setNextKey(chosenKeys[Math.floor(Math.random() * chosenKeys.length)]);
     }
 
-    const [startTime, setStartTime] = useState(Date.now());
-
-    const [realStartTime, setRealStartTime] = useState(Date.now());
-
-    const [currentTime, setNowTime] = useState(Date.now());
-
-
-    const resetTimer = () => {
-        setStartTime(Date.now());
+    const TIMER_INTERVAL = 10;
+    const [timerMs, setTimerMs] = useState(0);
+    const [timer, setTimer] = useState<NodeJS.Timer>();
+    const [meanTime, setMeanTime] = useState(NaN);
+    const executeTimer = () => setTimerMs(prevState => prevState + TIMER_INTERVAL);
+    const startTimer = () => setTimer(setInterval(executeTimer, TIMER_INTERVAL));
+    const stopTimer = () => {
+        clearInterval(timer);
+        setTimer(undefined);
+        setMeanTime(total >= 1 ? timerMs / total : NaN);
     }
-
 
     useEffect(() => {
         WebMidi
@@ -189,21 +79,13 @@ export default function Home() {
             })
             .catch(err => alert(err));
         newRandomChord();
-        Soundfont.instrument(new AudioContext(), 'acoustic_grand_piano').then(function (piano) {
+        Soundfont.instrument(new AudioContext(), 'acoustic_grand_piano', {gain: 500}).then(function (piano) {
             window.navigator.requestMIDIAccess().then(function (midiAccess) {
                 midiAccess.inputs.forEach(function (midiInput) {
-                  piano.listenToMidi(midiInput)
+                    piano.listenToMidi(midiInput)
                 })
-              })
+            })
         })
-    }, [])
-
-    useEffect(() => {
-        setRealStartTime(Date.now)
-        const id = setInterval(() => {
-            setNowTime(Date.now())
-        }, 10)
-        return () => clearInterval(id);
     }, [])
 
     // generate new chord after connecting MIDI device
@@ -348,11 +230,13 @@ export default function Home() {
                 setCanInput(false);
                 setTotal(total + 1);
                 setText("Incorrect...");
+                stopTimer();
                 setTimeout(() => {// 1s delay before continuing
                     newRandomKey();
                     newRandomChord();
                     setText("");
                     setCanInput(true);
+                    startTimer();
                 }, 1000);
             }
         });
@@ -361,14 +245,16 @@ export default function Home() {
             setSuccesses(successes + 1);
             setTotal(total + 1);
             setText("Correct!");
+            stopTimer();
             setTimeout(() => {// 1s delay before continuing
                 newRandomKey();
                 newRandomChord();
                 setText("");
                 setCanInput(true);
+                startTimer();
             }, 1000);
         }
-    }, [canInput, chord, newRandomKey, notes, successes, total]);
+    }, [canInput, chord, newRandomKey, notes, startTimer, stopTimer, successes, total]);
 
     return (
         <div>
@@ -413,11 +299,18 @@ export default function Home() {
                 }
 
                 <div className="flex justify-center gap-4 text-xl">
-                    <p>{((currentTime - startTime)/1000).toFixed(2)}s</p>
-                    <p>Mean Time: {((currentTime - realStartTime)/(1000 * (total + 1))).toFixed(2)}s</p>
                     <p>{successes}/{total}</p>
                     <p>{isNaN(successes / total) ? "0" : Math.round(100 * successes / total)}%</p>
+                    <p>{(timerMs / 1000).toFixed(2)}s</p>
+                    <p>Mean Time: {isNaN(meanTime) ? "---" : (meanTime / 1000).toFixed(2) + "s"}</p>
                 </div>
+
+                {deviceId &&
+                    <div className="flex justify-center gap-4 text-xl">
+                        <p>{successes}/{total}</p>
+                        <p>{isNaN(successes / total) ? "0" : Math.round(100 * successes / total)}%</p>
+                    </div>
+                }
 
                 <p className="text-xl">
                     {text}
@@ -426,13 +319,15 @@ export default function Home() {
                 <div className="flex flex-col justify-center">
                     <MidiContextProvider value={{modalOpen, setModalOpen, loadState, setLoadState, deviceId, setDeviceId, devices, setDevices, notes, setNotes}}>
                         <PageContent />
-                        <DeviceSelectForm />
+                        <DeviceSelectionModal isOpen={modalOpen} setIsOpen={setModalOpen}/>
                     </MidiContextProvider>
                 </div>
 
                 <OptionsModal
                     isOpen={optionsOpen}
                     setIsOpen={setOptionsOpen}
+                    chordSets={chordSets}
+                    setChordSets={setChordSets}
                     clefs={clefs}
                     setClefs={setClefs}
                     keys={keys}

@@ -1,8 +1,8 @@
 import Button from "./Button";
 import CenteredModal from "./CenteredModal";
 import {useContext} from "react";
-import {LoadingState, MidiContext} from "../pages"
 import {WebMidi} from "webmidi";
+import {LoadingState, MidiContext} from "../util/MidiContext";
 
 export default function DeviceSelectionModal(props: {isOpen: boolean, setIsOpen: (x: boolean) => void}) {
     const {devices, setDevices, setDeviceId, setLoadState, setModalOpen} = useContext(MidiContext)
@@ -15,10 +15,15 @@ export default function DeviceSelectionModal(props: {isOpen: boolean, setIsOpen:
     return (
         <CenteredModal isOpen={props.isOpen} setIsOpen={props.setIsOpen} clickToClose={false}>
             <div className="flex flex-col gap-4 bg-white px-8 py-6 rounded-lg">
+                <button
+                    onClick={() => props.setIsOpen(false)}
+                    className="absolute top-0 right-2 text-5xl">
+                    ×
+                </button>
                 <h1 className="text-xl font-bold">
                     Select a MIDI device
                 </h1>
-                <div className="flex flex-col">
+                <div className="flex flex-col gap-1">
                     {devices.length > 0 && devices.map(device => (
                         <button
                             onClick={() => handleSubmit(device.id)}

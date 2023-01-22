@@ -1,5 +1,3 @@
-import Button from "./Button";
-
 export default function ToggleButton(props: {
     isOn: boolean,
     callback: () => void,
