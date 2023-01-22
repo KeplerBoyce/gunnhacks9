@@ -81,7 +81,7 @@ export default function Midi() {
     function onEnabled() {
         // Display available MIDI input devices
         if (WebMidi.inputs.length >= 1) {
-            setLoadState(LoadingState.DEVICE_SELECTED);
+            setLoadState(LoadingState.SELECTING_DEVICE);
             setDevices(WebMidi.inputs);
         } else setLoadState(LoadingState.NO_DEVICE);
     }
